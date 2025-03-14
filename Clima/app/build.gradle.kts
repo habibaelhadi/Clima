@@ -62,4 +62,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation ("com.airbnb.android:lottie-compose:6.1.0")
     implementation ("com.exyte:animated-navigation-bar:1.0.0")
+
+    implementation ("np.com.susanthapa:curved_bottom_navigation:0.6.5")
 }
