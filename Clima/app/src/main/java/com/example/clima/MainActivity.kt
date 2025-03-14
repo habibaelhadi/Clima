@@ -1,40 +1,28 @@
 package com.example.clima
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -43,25 +31,24 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.clima.routes.ScreenMenuItem
 import com.example.clima.routes.SetupNavHost
-import com.example.clima.utilites.NavigationBarItems
-import com.exyte.animatednavbar.AnimatedNavigationBar
-import com.exyte.animatednavbar.animation.balltrajectory.Parabolic
-import com.exyte.animatednavbar.animation.indendshape.Height
-import com.exyte.animatednavbar.animation.indendshape.shapeCornerRadius
+import com.example.clima.utilites.ColorResource
 import kotlinx.coroutines.delay
+import np.com.susanthapa.curved_bottom_navigation.CbnMenuItem
+import np.com.susanthapa.curved_bottom_navigation.CurvedBottomNavigationView
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -82,61 +69,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Preview(showBackground = true)
     @Composable
     fun ScaffoldSample() {
-
-        val navigationBarItems = remember { NavigationBarItems.entries.toTypedArray() }
-        var selectedIndex by remember { mutableIntStateOf(0) }
-
         val navController = rememberNavController()
-        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
         Scaffold(
-            topBar = { TopAppBar(title = { Text("Top app bar") }) },
             bottomBar = {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    AnimatedNavigationBar(
-                        modifier = Modifier.height(64.dp),
-                        selectedIndex = selectedIndex,
-                        cornerRadius = shapeCornerRadius(cornerRadius = 34.dp),
-                        ballAnimation = Parabolic(tween(300)),
-                        indentAnimation = Height(tween(300)),
-                        barColor = MaterialTheme.colorScheme.primary,
-                        ballColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        navigationBarItems.forEach { item ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .noRippleClickable {
-                                        selectedIndex = item.ordinal
-                                    },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .weight(1f),
-                                    imageVector = item.icon,
-                                    contentDescription = item.name,
-                                    tint = if (selectedIndex == item.ordinal) MaterialTheme.colorScheme.onPrimary
-                                    else MaterialTheme.colorScheme.inversePrimary
-                                )
-                            }
-                        }
-                    }
-                }
+                CurvedNavBar(navController)
             },
             content = { innerPadding ->
                 Column(
                     Modifier.padding(innerPadding)
                 ) {
-                    SetupNavHost()
+                    SetupNavHost(navController)
                 }
             }
         )
@@ -161,9 +106,6 @@ class MainActivity : ComponentActivity() {
             composition = composition,
             iterations = LottieConstants.IterateForever // Loop the animation
         )
-
-        // State to track if the animation is complete
-        var isAnimationComplete by remember { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             delay(4000) // Display the splash screen for 3 seconds
@@ -190,12 +132,33 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @SuppressLint("ModifierFactoryUnreferencedReceiver")
-    fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
-        clickable(indication = null,
-            interactionSource = remember { MutableInteractionSource() }) {
-            onClick()
-        }
-    }
+    @Composable
+    fun CurvedNavBar(navController: NavHostController) {
+        AndroidView(
+            factory = { context ->
+                CurvedBottomNavigationView(context).apply {
 
+                    unSelectedColor = ColorResource.WHITE.getColor(context)
+                    selectedColor = ColorResource.PURPLE.getColor(context)
+                    navBackgroundColor = ColorResource.PURPLE.getColor(context)
+
+                    val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
+                        CbnMenuItem(
+                            icon = screen.icon,
+                            avdIcon = screen.selectedIcon,
+                            destinationId = screen.id
+                        )
+                    }
+                    setMenuItems(cbnMenuItems.toTypedArray(), 0)
+                    setOnMenuItemClickListener{ cbnMenuItem, i ->
+                         navController.popBackStack()
+                         navController.navigate(ScreenMenuItem.menuItems[i].route.route)
+                    }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+        )
+    }
 }
