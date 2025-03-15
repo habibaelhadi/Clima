@@ -26,7 +26,7 @@ data class CurrentWeather(
     )
 
     data class Main(
-        val feels_like: Int,
+        val feels_like: Double,
         val grnd_level: Int,
         val humidity: Int,
         val pressure: Int,
@@ -54,6 +54,6 @@ data class CurrentWeather(
     data class Wind(
         val deg: Int,
         val gust: Double,
-        val speed: Int
+        val speed: Double
     )
 }
