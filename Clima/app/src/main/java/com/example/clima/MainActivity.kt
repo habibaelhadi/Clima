@@ -138,9 +138,12 @@ class MainActivity : ComponentActivity() {
             factory = { context ->
                 CurvedBottomNavigationView(context).apply {
 
+                    val color = Color(0xFF6A1B9A)
+                    val hashCode = color.hashCode()
+
                     unSelectedColor = ColorResource.WHITE.getColor(context)
-                    selectedColor = ColorResource.PURPLE.getColor(context)
-                    navBackgroundColor = ColorResource.PURPLE.getColor(context)
+                    selectedColor = hashCode
+                    navBackgroundColor = hashCode
 
                     val cbnMenuItems = ScreenMenuItem.menuItems.map { screen ->
                         CbnMenuItem(
@@ -152,7 +155,7 @@ class MainActivity : ComponentActivity() {
                     setMenuItems(cbnMenuItems.toTypedArray(), 0)
                     setOnMenuItemClickListener{ cbnMenuItem, i ->
                          navController.popBackStack()
-                         navController.navigate(ScreenMenuItem.menuItems[i].route.route)
+                         navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
                     }
                 }
             },

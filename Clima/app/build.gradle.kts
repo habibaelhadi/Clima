@@ -92,5 +92,7 @@ dependencies {
     //LiveData & Compose
     val compose_version = "1.0.0"
     implementation ("androidx.compose.runtime:runtime-livedata:$compose_version")
+    //To use constraintlayout in compose
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.1.1")
 
 }
