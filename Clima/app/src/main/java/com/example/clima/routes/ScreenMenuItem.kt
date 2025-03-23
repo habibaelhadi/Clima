@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import com.example.clima.R
 
 data class ScreenMenuItem(
-    val route: RoutesScreens,
+    val screen: RoutesScreens,
     @DrawableRes val icon: Int,
     @DrawableRes val selectedIcon: Int,
     val id: Int
