@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -44,7 +46,6 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.Response
 
-
 @Preview
 @Composable
 fun HomeScreen() {
@@ -53,45 +54,53 @@ fun HomeScreen() {
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
     viewModel.getWeather()
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
-    when(uiState){
-        is Response.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize()
-            ) { CircularProgressIndicator() }
-        }
-        is Response.Failure -> {
-            val error = (uiState as Response.Failure).error
-            Log.e("TAG", "HomeScreen: $error")
-        }
-        is Response.Success -> {
-            val (currentWeather,forecast) = (uiState as Response.Success).data
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(
-                        horizontal = 24.dp,
-                        vertical = 10.dp
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (uiState) {
+            is Response.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize()
+                ) { CircularProgressIndicator() }
+            }
+
+            is Response.Failure -> {
+                val error = (uiState as Response.Failure).error
+                Log.e("TAG", "HomeScreen: $error")
+            }
+
+            is Response.Success -> {
+                val (currentWeather, forecast,hourly) = (uiState as Response.Success).data
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 10.dp)
+                ) {
+                    LocationDetails(
+                        modifier = Modifier.padding(top = 10.dp),
+                        location = currentWeather.name
                     )
-            ) {
-                LocationDetails(
-                    modifier = Modifier.padding(top = 10.dp),
-                    location = currentWeather.name
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                CurrentWeather(
-                    weatherResponse = currentWeather
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                AirQuality(
-                    airQuality = currentWeather
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                WeeklyForecast(
-                    data = forecast
-                )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    CurrentWeather(
+                        weatherResponse = currentWeather
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    AirQuality(
+                        airQuality = currentWeather
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WeeklyForecast(
+                        data = forecast
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HourlyWeather(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 200.dp),
+                        data = hourly
+                    )
+                }
             }
         }
     }

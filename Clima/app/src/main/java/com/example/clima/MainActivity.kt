@@ -1,6 +1,7 @@
 package com.example.clima
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -148,6 +149,7 @@ class MainActivity : ComponentActivity() {
                             destinationId = screen.id
                         )
                     }
+                    layoutDirection = View.LAYOUT_DIRECTION_LTR
                     setMenuItems(cbnMenuItems.toTypedArray(), 0)
                     setOnMenuItemClickListener{ cbnMenuItem, i ->
                          navController.popBackStack()

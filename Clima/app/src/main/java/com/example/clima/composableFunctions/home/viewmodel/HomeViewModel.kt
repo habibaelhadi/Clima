@@ -16,11 +16,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
     private val _currentWeather =
-        MutableStateFlow<Response<Pair<CurrentWeather, List<ForeCast.ForecastWeather>>>>(Response.Loading)
+        MutableStateFlow<Response<Triple<CurrentWeather, List<ForeCast.ForecastWeather>,List<ForeCast.ForecastWeather>>>>(Response.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
     fun getWeather() {
@@ -44,7 +45,17 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         }
                         .firstOrNull() ?: emptyList()
                 }
-                val data = Pair(current.await(), forecast.await())
+                val hourly = async {
+                    weatherRepo.getForecast(31.252321, 29.992283, "metric", "en")
+                        .catch {
+                            _currentWeather.value = Response.Failure(it.message.toString())
+                        }
+                        .map { forecastMap ->
+                            forecastMap.list.take(5)
+                        }
+                        .first()
+                }
+                val data = Triple(current.await(), forecast.await(),hourly.await())
                 _currentWeather.value = Response.Success(data)
             } catch (e: Exception) {
                 _currentWeather.value = Response.Failure(e.message.toString())
