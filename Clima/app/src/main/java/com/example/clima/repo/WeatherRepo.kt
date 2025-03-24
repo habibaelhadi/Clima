@@ -1,6 +1,7 @@
 package com.example.clima.repo
 
 import com.example.clima.model.CurrentWeather
+import com.example.clima.model.ForeCast
 import com.example.clima.remote.IWeatherRemoteDataSource
 import com.example.clima.remote.WeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,15 @@ class WeatherRepo private constructor(private val weatherRemoteDataSource: IWeat
         lang : String
     ): Flow<CurrentWeather> {
         return weatherRemoteDataSource.getCurrentWeather(latitude,longitude,units,lang)
+    }
+
+    override suspend fun getForecast(
+        latitude: Double,
+        longitude: Double,
+        units: String,
+        lang: String
+    ): Flow<ForeCast> {
+        return weatherRemoteDataSource.getForecast(latitude,longitude,units,lang)
     }
 
     companion object {
