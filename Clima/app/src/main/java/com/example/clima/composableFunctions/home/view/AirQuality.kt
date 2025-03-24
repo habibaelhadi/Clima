@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clima.R
+import com.example.clima.model.CurrentWeather
 import com.example.clima.ui.theme.Black
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.PurpleGrey40
@@ -29,12 +30,22 @@ import com.example.clima.utilites.AirQualityItem
 import com.example.clima.utilites.airItems
 
 @OptIn(ExperimentalLayoutApi::class)
-@Preview
 @Composable
 fun AirQuality(
     modifier: Modifier = Modifier,
-    data: List<AirQualityItem> = airItems
+    data: List<AirQualityItem> = airItems,
+    airQuality : CurrentWeather
 ) {
+    val humidity = airQuality.main.humidity.toString()
+    val pressure = airQuality.main.pressure.toString()
+    val windSpeed = airQuality.wind.speed.toString()
+    val clouds = airQuality.clouds.all.toString()
+
+    airItems[0].value = windSpeed
+    airItems[1].value = humidity
+    airItems[2].value = pressure
+    airItems[3].value = clouds
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),

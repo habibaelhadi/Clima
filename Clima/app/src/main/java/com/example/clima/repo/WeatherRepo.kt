@@ -3,12 +3,18 @@ package com.example.clima.repo
 import com.example.clima.model.CurrentWeather
 import com.example.clima.remote.IWeatherRemoteDataSource
 import com.example.clima.remote.WeatherRemoteDataSource
+import kotlinx.coroutines.flow.Flow
 
 class WeatherRepo private constructor(private val weatherRemoteDataSource: IWeatherRemoteDataSource
 ) : IWeatherRepo  {
 
-    override suspend fun getCurrentWeather(): CurrentWeather {
-        return weatherRemoteDataSource.getCurrentWeather()
+    override suspend fun getCurrentWeather(
+        latitude: Double,
+        longitude: Double,
+        units : String,
+        lang : String
+    ): Flow<CurrentWeather> {
+        return weatherRemoteDataSource.getCurrentWeather(latitude,longitude,units,lang)
     }
 
     companion object {
