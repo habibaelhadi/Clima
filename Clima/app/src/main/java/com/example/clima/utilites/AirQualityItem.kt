@@ -6,7 +6,7 @@ import com.example.clima.R
 data class AirQualityItem (
     @DrawableRes val icon : Int,
     val title : String,
-    val value : String
+    var value : String
 )
 
 val airItems = mutableListOf(

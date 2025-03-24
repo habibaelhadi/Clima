@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
 import com.example.clima.composableFunctions.home.viewmodel.HomeViewModel
@@ -37,6 +42,7 @@ import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
+import com.example.clima.utilites.Response
 
 
 @Preview
@@ -45,31 +51,51 @@ fun HomeScreen() {
     val homeFactory =
         HomeViewModel.HomeFactory(WeatherRepo.getInstance(WeatherRemoteDataSource(RetrofitProduct.retrofit)))
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
-    val currentWeather = viewModel.currentWeather.observeAsState()
-    val data = viewModel.getCurrentWeather()
-    Log.i("TAG", "HomeScreen: ${currentWeather.value}")
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                horizontal = 24.dp,
-                vertical = 10.dp
-            )
-    ) {
-        LocationDetails(
-            modifier = Modifier.padding(top = 10.dp)
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        CurrentWeather()
-        Spacer(modifier = Modifier.height(16.dp))
-        AirQuality()
+    viewModel.getCurrentWeather()
+    val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
+    when(uiState){
+        is Response.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize()
+            ) { CircularProgressIndicator() }
+        }
+        is Response.Failure -> {
+            val error = (uiState as Response.Failure).error
+            Log.e("TAG", "HomeScreen: $error")
+        }
+        is Response.Success -> {
+            val currentWeather = (uiState as Response.Success).data
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 10.dp
+                    )
+            ) {
+                LocationDetails(
+                    modifier = Modifier.padding(top = 10.dp),
+                    location = currentWeather.name
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                CurrentWeather(
+                    weatherResponse = currentWeather
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AirQuality(
+                    airQuality = currentWeather
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun LocationDetails(
     modifier: Modifier = Modifier,
-    location: String = "Alex"
+    location: String
 ) {
     Column(
         modifier = modifier,
