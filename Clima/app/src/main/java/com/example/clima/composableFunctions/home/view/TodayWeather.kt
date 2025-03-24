@@ -83,7 +83,7 @@ private fun HourlyCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                horizontal = 24.dp,
+                horizontal = 16.dp,
                 vertical = 4.dp
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -109,7 +109,7 @@ private fun HourlyCard(
                 .padding(start = 16.dp)
         )
         Text(
-            text = data.temp,
+            text = "${data.temp}°",
             color = Black,
             fontSize = 14.sp,
             modifier = Modifier

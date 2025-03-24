@@ -51,7 +51,7 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .map { forecastMap ->
-                            forecastMap.list.take(5)
+                            forecastMap.list.take(8)
                         }
                         .first()
                 }
