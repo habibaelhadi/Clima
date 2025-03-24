@@ -1,12 +1,16 @@
 package com.example.clima.repo
 
+import com.example.clima.local.IWeatherLocalDataSource
 import com.example.clima.model.CurrentWeather
+import com.example.clima.model.DataBaseTable
 import com.example.clima.model.ForeCast
 import com.example.clima.remote.IWeatherRemoteDataSource
 import com.example.clima.remote.WeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
-class WeatherRepo private constructor(private val weatherRemoteDataSource: IWeatherRemoteDataSource
+class WeatherRepo private constructor(
+    private val weatherRemoteDataSource: IWeatherRemoteDataSource,
+    private val weatherLocalDataSource: IWeatherLocalDataSource
 ) : IWeatherRepo  {
 
     override suspend fun getCurrentWeather(
@@ -27,12 +31,27 @@ class WeatherRepo private constructor(private val weatherRemoteDataSource: IWeat
         return weatherRemoteDataSource.getForecast(latitude,longitude,units,lang)
     }
 
+    override suspend fun insertWeather(weather: DataBaseTable) {
+        weatherLocalDataSource.insertWeather(weather)
+    }
+
+    override suspend fun deleteWeather(weather: DataBaseTable) {
+        weatherLocalDataSource.deleteWeather(weather)
+    }
+
+    override fun getWeather(): Flow<List<DataBaseTable>> {
+        return weatherLocalDataSource.getWeather()
+    }
+
     companion object {
         @Volatile
         private var instance: WeatherRepo? = null
-        fun getInstance(remoteDataSource: WeatherRemoteDataSource): WeatherRepo {
+        fun getInstance(
+            remoteDataSource: WeatherRemoteDataSource,
+            localDataSource: IWeatherLocalDataSource
+        ): WeatherRepo {
             return instance ?: synchronized(this) {
-                instance ?: WeatherRepo(remoteDataSource).also { instance = it }
+                instance ?: WeatherRepo(remoteDataSource,localDataSource).also { instance = it }
             }
         }
     }

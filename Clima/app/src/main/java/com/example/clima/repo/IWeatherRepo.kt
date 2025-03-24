@@ -1,6 +1,7 @@
 package com.example.clima.repo
 
 import com.example.clima.model.CurrentWeather
+import com.example.clima.model.DataBaseTable
 import com.example.clima.model.ForeCast
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +19,8 @@ interface IWeatherRepo {
         units : String,
         lang : String
     ) : Flow<ForeCast>
+
+    suspend fun insertWeather(weather: DataBaseTable)
+    suspend fun deleteWeather(weather: DataBaseTable)
+    fun getWeather(): Flow<List<DataBaseTable>>
 }

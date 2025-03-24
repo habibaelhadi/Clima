@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -36,6 +37,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
 import com.example.clima.composableFunctions.home.viewmodel.HomeViewModel
+import com.example.clima.local.AppDataBase
+import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
@@ -50,7 +53,10 @@ import com.example.clima.utilites.Response
 @Composable
 fun HomeScreen() {
     val homeFactory =
-        HomeViewModel.HomeFactory(WeatherRepo.getInstance(WeatherRemoteDataSource(RetrofitProduct.retrofit)))
+        HomeViewModel.HomeFactory(WeatherRepo.getInstance(
+            WeatherRemoteDataSource(RetrofitProduct.retrofit),
+            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()))
+        )
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
     viewModel.getWeather()
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
