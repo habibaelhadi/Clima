@@ -12,19 +12,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -49,9 +57,14 @@ import np.com.susanthapa.curved_bottom_navigation.CbnMenuItem
 import np.com.susanthapa.curved_bottom_navigation.CurvedBottomNavigationView
 
 class MainActivity : ComponentActivity() {
+
+    lateinit var showFAB: MutableState<Boolean>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            showFAB = remember { mutableStateOf(false) }
+
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
@@ -65,17 +78,31 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    ScaffoldSample()
+                    ScaffoldSample(showFAB)
                 }
             }
         }
     }
 
-    @Preview(showBackground = true)
     @Composable
-    fun ScaffoldSample() {
+    fun ScaffoldSample(showFAB: MutableState<Boolean>) {
         val navController = rememberNavController()
         Scaffold(
+            floatingActionButton = {
+                if (showFAB.value) {
+                    FloatingActionButton(
+                        onClick = { },
+                        containerColor = colorResource(R.color.purple),
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = "Favorite",
+                            tint = Color.White
+                        )
+                    }
+                }
+            },
             bottomBar = {
                 CurvedNavBar(navController)
             },
@@ -83,7 +110,7 @@ class MainActivity : ComponentActivity() {
                 Column(
                     Modifier.padding(innerPadding)
                 ) {
-                    SetupNavHost(navController)
+                    SetupNavHost(navController,showFAB)
                 }
             }
         )
@@ -114,7 +141,8 @@ class MainActivity : ComponentActivity() {
 
         // Display the Lottie animation
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(Gray),
             contentAlignment = Alignment.Center
         ) {
@@ -128,13 +156,17 @@ class MainActivity : ComponentActivity() {
                 text = stringResource(R.string.clima),
                 fontFamily = pacificoFontFamily,
                 fontSize = 40.sp,
-                color = colorGradient1)
+                color = colorGradient1
+            )
         }
     }
 
     @Composable
     fun CurvedNavBar(navController: NavHostController) {
         AndroidView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp),
             factory = { context ->
                 CurvedBottomNavigationView(context).apply {
 
@@ -151,15 +183,12 @@ class MainActivity : ComponentActivity() {
                     }
                     layoutDirection = View.LAYOUT_DIRECTION_LTR
                     setMenuItems(cbnMenuItems.toTypedArray(), 0)
-                    setOnMenuItemClickListener{ cbnMenuItem, i ->
-                         navController.popBackStack()
-                         navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
+                    setOnMenuItemClickListener { cbnMenuItem, i ->
+                        navController.popBackStack()
+                        navController.navigate(ScreenMenuItem.menuItems[i].screen.route)
                     }
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp)
+            }
         )
     }
 }
