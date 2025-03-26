@@ -57,7 +57,8 @@ import com.google.android.gms.maps.model.LatLng
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun FavouritesScreen(showFAB: MutableState<Boolean>) {
+fun FavouritesScreen(showFAB: MutableState<Boolean>,
+                     navigateToDetails: (Double,Double) -> Unit) {
 
     val favFactory = FavouriteViewModel.FavFactory(
         WeatherRepo.getInstance(
@@ -90,7 +91,7 @@ fun FavouritesScreen(showFAB: MutableState<Boolean>) {
             if (data.isEmpty()) {
                 NoFavourites()
             } else {
-                FavouritesList(data,viewModel)
+                FavouritesList(data,viewModel,navigateToDetails)
             }
         }
     }
@@ -136,7 +137,11 @@ fun NoFavourites() {
 }
 
 @Composable
-fun FavouritesList(data: List<DataBaseTable>, viewModel: FavouriteViewModel) {
+fun FavouritesList(
+    data: List<DataBaseTable>,
+    viewModel: FavouriteViewModel,
+    navigateToDetails: (Double, Double) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,18 +174,21 @@ fun FavouritesList(data: List<DataBaseTable>, viewModel: FavouriteViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 200.dp, max = 400.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ){
             items(data.size){
-                FavouriteCard(data[it],viewModel)
+                FavouriteCard(data[it],viewModel,navigateToDetails)
             }
         }
     }
 }
 
 @Composable
-fun FavouriteCard(data: DataBaseTable,
-                  viewModel: FavouriteViewModel) {
+fun FavouriteCard(
+    data: DataBaseTable,
+    viewModel: FavouriteViewModel,
+    navigateToDetails: (Double, Double) -> Unit
+) {
     val context = LocalContext.current
     val country = GeocoderHelper(context). getLocationInfo(
         LatLng(data.latitude,data.longitude)
@@ -188,7 +196,7 @@ fun FavouriteCard(data: DataBaseTable,
     Card (
         modifier = Modifier
             .clickable {
-
+                navigateToDetails(data.latitude,data.longitude)
             }
             .fillMaxWidth()
             .padding(
