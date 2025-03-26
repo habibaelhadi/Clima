@@ -1,37 +1,42 @@
 package com.example.clima.routes
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.clima.composableFunctions.alarms.view.AlarmsScreen
 import com.example.clima.composableFunctions.favourites.view.FavouritesScreen
 import com.example.clima.composableFunctions.home.view.HomeScreen
+import com.example.clima.composableFunctions.map.view.MapScreen
 import com.example.clima.composableFunctions.settings.view.SettingsScreen
 
 
 @Composable
-fun SetupNavHost(navController: NavHostController){
+fun SetupNavHost(navController: NavHostController,
+                 showFAB : MutableState<Boolean>){
     NavHost(
         navController = navController,
         startDestination = RoutesScreens.Home.route
     ){
         composable(RoutesScreens.Home.route){
-            HomeScreen()
+            HomeScreen(showFAB)
         }
 
         composable(RoutesScreens.Favourites.route){
-            FavouritesScreen()
+            FavouritesScreen(showFAB)
         }
 
         composable(RoutesScreens.Alarms.route){
-            AlarmsScreen()
+            AlarmsScreen(showFAB)
         }
 
         composable(RoutesScreens.Settings.route){
-            SettingsScreen()
+            SettingsScreen(showFAB)
         }
 
+        composable(RoutesScreens.Map.route){
+            MapScreen()
+        }
     }
 }

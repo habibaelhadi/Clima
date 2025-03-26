@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,9 +50,10 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.Response
 
-@Preview
+
 @Composable
-fun HomeScreen() {
+fun HomeScreen(showFAB: MutableState<Boolean>) {
+    showFAB.value = false
     val homeFactory =
         HomeViewModel.HomeFactory(WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),

@@ -17,4 +17,7 @@ sealed class RoutesScreens (val route: String, val label: String, val icon: Int)
 
     @Serializable
     object Settings : RoutesScreens("settings","Settings", R.drawable.baseline_settings_24)
+
+    @Serializable
+    object Map : RoutesScreens("map","Map", R.drawable.baseline_location_pin_24)
 }
