@@ -1,31 +1,42 @@
 package com.example.clima.composableFunctions.favourites.view
 
-import android.location.Geocoder
-import android.widget.Toast
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
@@ -36,174 +47,185 @@ import com.example.clima.model.DataBaseTable
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
+import com.example.clima.ui.theme.White
+import com.example.clima.ui.theme.colorGradient1
+import com.example.clima.ui.theme.colorGradient2
+import com.example.clima.ui.theme.colorGradient3
+import com.example.clima.utilites.GeocoderHelper
+import com.example.clima.utilites.Response
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.libraries.places.compose.autocomplete.components.PlacesAutocompleteTextField
-import com.google.android.libraries.places.compose.autocomplete.models.AutocompletePlace
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
-import java.util.Locale
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun FavouritesScreen(showFAB: MutableState<Boolean>) {
 
-    showFAB.value = true
-    val context = LocalContext.current
-
-    // Initialize Places API (outside ViewModel)
-    Places.initializeWithNewPlacesApiEnabled(context, "AIzaSyCaj10hgcwGaosoYRyv79ppLviFJ9eMNmM")
-    val placesClient: PlacesClient = Places.createClient(context)
-
-    // Create ViewModel with custom factory
-    val mapScreenFactory = FavouriteViewModel.FavouriteViewModelFactory(
-        placesClient = placesClient,
-        repository = WeatherRepo.getInstance(
+    val favFactory = FavouriteViewModel.FavFactory(
+        WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao())
+            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
         )
     )
-    val viewModel: FavouriteViewModel = viewModel(factory = mapScreenFactory)
 
-    val searchText by viewModel.searchText.collectAsStateWithLifecycle()
-    val predictions by viewModel.predictions.collectAsStateWithLifecycle()
-    val selectedLocation by viewModel.selectedLocation.collectAsStateWithLifecycle()
+    val viewModel: FavouriteViewModel = viewModel(factory = favFactory)
+    val uiState by viewModel.favouriteLocations.collectAsStateWithLifecycle()
+    viewModel.getFavouriteCities()
+    showFAB.value = true
 
-    val markerState = rememberMarkerState(
-        position = LatLng(
-            selectedLocation?.latitude ?: 31.2001,
-            selectedLocation?.longitude ?: 29.9187,
-        )
-    )
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(markerState.position, 10f)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.message.collect {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    LaunchedEffect(selectedLocation) {
-        selectedLocation?.let {
-            val newLatLng = LatLng(it.latitude, it.longitude)
-
-            markerState.position = newLatLng
-
-            cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(newLatLng, 12f))
-        }
-    }
-
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(mapType = MapType.HYBRID),
-            onMapClick = { latLng ->
-                markerState.position = latLng
-                viewModel.updateSelectedLocation(latLng)
-            }
-        ) {
-            Marker(
-                state = markerState,
-                title = "Selected Location",
-                snippet = "Marker at selected location"
-            )
+    when (uiState) {
+        is Response.Failure -> {
+            val error = (uiState as Response.Failure).error
+            Log.e("TAG", "HomeScreen: $error")
         }
 
-        PlacesAutocompleteTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            searchText = searchText,
-            textFieldMaxLines = 1,
-            predictions = predictions.map {
-                AutocompletePlace(
-                    placeId = it.placeId,
-                    primaryText = it.getPrimaryText(null),
-                    secondaryText = it.getSecondaryText(null)
-                )
-            },
-            onQueryChanged = { viewModel.onSearchQueryChanged(it) },
-            onSelected = { autocompletePlace ->
-                viewModel.onPlaceSelected(autocompletePlace.placeId)
-            },
-            selectedPlace = null
-        )
-
-
-        selectedLocation?.let { location ->
-            val favouriteLocation = DataBaseTable(location.latitude, location.longitude)
-            val address = getAddressFromLocation(favouriteLocation)
-            Card(
+        is Response.Loading -> {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(colorResource(R.color.white))
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = address,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = colorResource(R.color.black),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Latitude: ${location.latitude}")
-                    Text(text = "Longitude: ${location.longitude}")
-                    Spacer(modifier = Modifier.height(12.dp))
+                    .fillMaxSize()
+                    .wrapContentSize()
+            ) { CircularProgressIndicator() }
+        }
 
-                    Button(
-                        onClick = {
-                            viewModel.insertFavouriteLocation(
-                                selectedLocation!!.latitude,
-                                selectedLocation!!.longitude
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(colorResource(R.color.purple)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Add to Favourites",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = colorResource(R.color.white),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+        is Response.Success -> {
+            val data = (uiState as Response.Success).data
+            if (data.isEmpty()) {
+                NoFavourites()
+            } else {
+                FavouritesList(data,viewModel)
             }
         }
     }
 }
 
 @Composable
-fun getAddressFromLocation(location: DataBaseTable): String {
-    val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
-    return try {
-        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-        if (!addresses.isNullOrEmpty()) {
-            val address = addresses[0]
-            address.getCountryName()
-        } else {
-            "Address Not Found !"
+fun NoFavourites() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_location_pin_24),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Favourites",
+                fontFamily = FontFamily(Font(R.font.exo2)),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorGradient1,
+                textAlign = TextAlign.Center
+            )
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        "Error Fetching Address"
+
+        Image(
+            painter = painterResource(R.drawable.fav),
+            contentDescription = null,
+            modifier = Modifier
+                .padding(horizontal = 48.dp)
+                .size(600.dp)
+        )
+    }
+}
+
+@Composable
+fun FavouritesList(data: List<DataBaseTable>, viewModel: FavouriteViewModel) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ){
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.baseline_location_pin_24),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Favourites",
+                fontFamily = FontFamily(Font(R.font.exo2)),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorGradient1,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 200.dp, max = 400.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            items(data.size){
+                FavouriteCard(data[it],viewModel)
+            }
+        }
+    }
+}
+
+@Composable
+fun FavouriteCard(data: DataBaseTable,
+                  viewModel: FavouriteViewModel) {
+    val context = LocalContext.current
+    val country = GeocoderHelper(context). getLocationInfo(
+        LatLng(data.latitude,data.longitude)
+    )
+    Card (
+        modifier = Modifier
+            .clickable {
+
+            }
+            .fillMaxWidth()
+            .padding(
+                horizontal = 16.dp
+            ),
+        shape = RoundedCornerShape(32.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+
+    ){
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = Brush.verticalGradient(
+                    colors = listOf(colorGradient3, colorGradient2, colorGradient1)
+                ))
+        ){
+            Row(
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Image(
+                    painter = painterResource(R.drawable.country),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(36.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = country.country.toString(),
+                    fontFamily = FontFamily(Font(R.font.exo2)),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
+            }
+        }
     }
 }

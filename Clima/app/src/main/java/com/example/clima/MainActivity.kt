@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,11 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -91,12 +89,12 @@ class MainActivity : ComponentActivity() {
             floatingActionButton = {
                 if (showFAB.value) {
                     FloatingActionButton(
-                        onClick = { },
-                        containerColor = colorResource(R.color.purple),
+                        onClick = { navController.navigate("map") },
+                        containerColor = colorGradient1,
                         shape = CircleShape
                     ) {
                         Icon(
-                            Icons.Default.Favorite,
+                            Icons.Default.Add,
                             contentDescription = "Favorite",
                             tint = Color.White
                         )

@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.clima.composableFunctions.alarms.view.AlarmsScreen
 import com.example.clima.composableFunctions.favourites.view.FavouritesScreen
 import com.example.clima.composableFunctions.home.view.HomeScreen
+import com.example.clima.composableFunctions.map.view.MapScreen
 import com.example.clima.composableFunctions.settings.view.SettingsScreen
 
 
@@ -34,5 +35,8 @@ fun SetupNavHost(navController: NavHostController,
             SettingsScreen(showFAB)
         }
 
+        composable(RoutesScreens.Map.route){
+            MapScreen()
+        }
     }
 }

@@ -214,6 +214,6 @@ fun detectIcon(iconCode : String) : Int{
          "11n" -> R.drawable.thunderstorm
          "13n" -> R.drawable.snow
          "50n" -> R.drawable.mist
-         else -> R.drawable.weather
+         else -> R.drawable.few_clouds_day
      }
 }
