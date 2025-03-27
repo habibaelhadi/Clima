@@ -1,11 +1,15 @@
 package com.example.clima.routes
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.clima.composableFunctions.alarms.view.AlarmsScreen
+import com.example.clima.composableFunctions.details.view.DetailsScreen
 import com.example.clima.composableFunctions.favourites.view.FavouritesScreen
 import com.example.clima.composableFunctions.home.view.HomeScreen
 import com.example.clima.composableFunctions.map.view.MapScreen
@@ -13,8 +17,11 @@ import com.example.clima.composableFunctions.settings.view.SettingsScreen
 
 
 @Composable
-fun SetupNavHost(navController: NavHostController,
-                 showFAB : MutableState<Boolean>){
+fun SetupNavHost(
+    navController: NavHostController,
+    showFAB: MutableState<Boolean>,
+    snackbar: SnackbarHostState
+){
     NavHost(
         navController = navController,
         startDestination = RoutesScreens.Home.route
@@ -24,7 +31,10 @@ fun SetupNavHost(navController: NavHostController,
         }
 
         composable(RoutesScreens.Favourites.route){
-            FavouritesScreen(showFAB)
+            FavouritesScreen(showFAB, snackbar,
+                navigateToDetails = {lat,lng ->
+                navController.navigate(RoutesScreens.FavouriteDetails.route(lat,lng))
+            })
         }
 
         composable(RoutesScreens.Alarms.route){
@@ -37,6 +47,18 @@ fun SetupNavHost(navController: NavHostController,
 
         composable(RoutesScreens.Map.route){
             MapScreen()
+        }
+
+        composable(
+            route = RoutesScreens.FavouriteDetails.route,
+            arguments = listOf(
+                navArgument("lat") { type = NavType.FloatType },
+                navArgument("lng") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+            val latitude = backStackEntry.arguments?.getFloat("lat") ?: 30.0444
+            val longitude = backStackEntry.arguments?.getFloat("lng") ?: 31.2357
+            DetailsScreen(showFAB, latitude, longitude)
         }
     }
 }

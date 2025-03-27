@@ -1,6 +1,7 @@
 package com.example.clima.composableFunctions.map.view
 
 import android.location.Geocoder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,6 +106,7 @@ fun MapScreen() {
                 cameraPositionState = cameraPositionState,
                 properties = MapProperties(mapType = MapType.HYBRID),
                 onMapClick = { latLng ->
+                    Log.i("TAG", "onMapClick: lat -> {${latLng.latitude}}, lng -> {${latLng.longitude}}")
                     markerState.position = latLng
                     viewModel.updateSelectedLocation(latLng)
                 }
@@ -191,12 +193,18 @@ fun MapScreen() {
 
 @Composable
 fun getAddressFromLocation(location: DataBaseTable): String {
+    Log.i("TAG", "getAddressFromLocation: lat -> {${location.latitude}}, lng -> {${location.longitude}}")
     val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
     return try {
         val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
         if (!addresses.isNullOrEmpty()) {
             val address = addresses[0]
-            address.getCountryName()
+            listOfNotNull(
+                address.featureName,    // e.g., landmark or building name
+                address.locality,       // City name
+                address.adminArea,      // State/Province
+                address.countryName     // Country
+            ).joinToString(", ")      // Combine all into one string
         } else {
             "Address Not Found !"
         }
