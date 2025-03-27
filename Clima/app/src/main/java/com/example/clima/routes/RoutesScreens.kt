@@ -25,4 +25,7 @@ sealed class RoutesScreens (val route: String, val label: String, val icon: Int)
     object FavouriteDetails : RoutesScreens("favDetails/{lat}/{lng}", "Details", R.drawable.country) {
         fun route(lat: Double, lng: Double) = "favDetails/$lat/$lng"
     }
+
+    @Serializable
+    object AlarmsDetails : RoutesScreens("alarmsDetails", "Details", R.drawable.country)
 }
