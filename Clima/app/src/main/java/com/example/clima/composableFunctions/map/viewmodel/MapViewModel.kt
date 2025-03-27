@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.clima.model.DataBaseTable
+import com.example.clima.model.FavouritePOJO
 import com.example.clima.repo.WeatherRepo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.AutocompletePrediction
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MapViewModel(private val placesClient: PlacesClient,
@@ -103,10 +104,13 @@ class MapViewModel(private val placesClient: PlacesClient,
         }
     }
 
-    fun insertFavouriteLocation(lat: Double, lon: Double) {
+    fun insertFavouriteLocation(lat: Double, lon: Double, country: String, city: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val favouriteLocation = DataBaseTable(latitude = lat, longitude = lon)
+                val currentWeather = repository.getCurrentWeather(lat,lon,"metric","en").first()
+                val forecast = repository.getForecast(lat,lon,"metric","en").first()
+                val favouriteLocation = FavouritePOJO(latitude = lat, longitude = lon,currentWeather,forecast,
+                    country,city)
                 repository.insertWeather(favouriteLocation)
                 mutableMessage.emit("Location Added Successfully!")
             } catch (ex: Exception){

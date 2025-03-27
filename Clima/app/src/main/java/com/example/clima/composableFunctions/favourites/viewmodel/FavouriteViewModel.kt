@@ -3,7 +3,7 @@ package com.example.clima.composableFunctions.favourites.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.clima.model.DataBaseTable
+import com.example.clima.model.FavouritePOJO
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class FavouriteViewModel(val repository: WeatherRepo) : ViewModel() {
     private val _favouriteLocations =
-        MutableStateFlow<Response<List<DataBaseTable>>>(Response.Loading)
+        MutableStateFlow<Response<List<FavouritePOJO>>>(Response.Loading)
     val favouriteLocations = _favouriteLocations.asStateFlow()
 
     private val mutableMessage = MutableSharedFlow<String>()
@@ -37,7 +37,7 @@ class FavouriteViewModel(val repository: WeatherRepo) : ViewModel() {
         }
     }
 
-    fun deleteFavouriteCity(city: DataBaseTable) {
+    fun deleteFavouriteCity(city: FavouritePOJO) {
         viewModelScope.launch {
             try{
                 repository.deleteWeather(city)

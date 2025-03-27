@@ -32,10 +32,10 @@ import com.example.clima.R
 import com.example.clima.composableFunctions.map.viewmodel.MapViewModel
 import com.example.clima.local.AppDataBase
 import com.example.clima.local.WeatherLocalDataSource
-import com.example.clima.model.DataBaseTable
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
+import com.example.clima.utilites.GeocoderHelper
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -140,8 +140,13 @@ fun MapScreen() {
 
 
             selectedLocation?.let { location ->
-                val favouriteLocation = DataBaseTable(location.latitude, location.longitude)
-                val address = getAddressFromLocation(favouriteLocation)
+                val lat = location.latitude
+                val lng = location.longitude
+                val address = getAddressFromLocation(lat,lng)
+                val context = LocalContext.current
+                val country = GeocoderHelper(context).getLocationInfo(
+                    LatLng(lat, lng)
+                )
                 Card(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -169,8 +174,10 @@ fun MapScreen() {
                         Button(
                             onClick = {
                                 viewModel.insertFavouriteLocation(
-                                    selectedLocation!!.latitude,
-                                    selectedLocation!!.longitude
+                                    location.latitude,
+                                    location.longitude,
+                                    country.country!!,
+                                    country.city!!
                                 )
                             },
                             colors = ButtonDefaults.buttonColors(colorResource(R.color.purple)),
@@ -192,19 +199,18 @@ fun MapScreen() {
 }
 
 @Composable
-fun getAddressFromLocation(location: DataBaseTable): String {
-    Log.i("TAG", "getAddressFromLocation: lat -> {${location.latitude}}, lng -> {${location.longitude}}")
+fun getAddressFromLocation(lat : Double,lng : Double): String {
     val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
     return try {
-        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+        val addresses = geocoder.getFromLocation(lat, lng, 1)
         if (!addresses.isNullOrEmpty()) {
             val address = addresses[0]
             listOfNotNull(
-                address.featureName,    // e.g., landmark or building name
-                address.locality,       // City name
-                address.adminArea,      // State/Province
-                address.countryName     // Country
-            ).joinToString(", ")      // Combine all into one string
+                address.featureName,
+                address.locality,
+                address.adminArea,
+                address.countryName
+            ).joinToString(", ")
         } else {
             "Address Not Found !"
         }

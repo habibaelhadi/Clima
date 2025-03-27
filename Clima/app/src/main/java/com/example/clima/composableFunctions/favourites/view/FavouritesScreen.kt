@@ -44,7 +44,7 @@ import com.example.clima.R
 import com.example.clima.composableFunctions.favourites.viewmodel.FavouriteViewModel
 import com.example.clima.local.AppDataBase
 import com.example.clima.local.WeatherLocalDataSource
-import com.example.clima.model.DataBaseTable
+import com.example.clima.model.FavouritePOJO
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
@@ -52,9 +52,7 @@ import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
-import com.example.clima.utilites.GeocoderHelper
 import com.example.clima.utilites.Response
-import com.google.android.gms.maps.model.LatLng
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -143,7 +141,7 @@ fun NoFavourites() {
 
 @Composable
 fun FavouritesList(
-    data: List<DataBaseTable>,
+    data: List<FavouritePOJO>,
     viewModel: FavouriteViewModel,
     navigateToDetails: (Double, Double) -> Unit,
     snackbar: SnackbarHostState
@@ -192,15 +190,11 @@ fun FavouritesList(
 
 @Composable
 fun FavouriteCard(
-    data: DataBaseTable,
+    data: FavouritePOJO,
     viewModel: FavouriteViewModel,
     navigateToDetails: (Double, Double) -> Unit,
     snackbar: SnackbarHostState
 ) {
-    val context = LocalContext.current
-    val country = GeocoderHelper(context).getLocationInfo(
-        LatLng(data.latitude, data.longitude)
-    )
     SwipeToDeleteContainer(
         item = data ,
         onDelete = { item ->
@@ -246,16 +240,16 @@ fun FavouriteCard(
                             .size(36.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Column() {
+                    Column{
                         Text(
-                            text = country.city.toString(),
+                            text = data.city,
                             fontFamily = FontFamily(Font(R.font.exo2)),
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = Gray
                         )
                         Text(
-                            text = country.country.toString(),
+                            text = data.country,
                             fontFamily = FontFamily(Font(R.font.exo2)),
                             fontSize = 18.sp,
                             color = Gray
