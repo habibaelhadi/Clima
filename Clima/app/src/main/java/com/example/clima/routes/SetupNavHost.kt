@@ -60,5 +60,6 @@ fun SetupNavHost(
             val longitude = backStackEntry.arguments?.getFloat("lng") ?: 31.2357
             DetailsScreen(showFAB, latitude, longitude)
         }
+
     }
 }

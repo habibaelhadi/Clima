@@ -90,11 +90,14 @@ class MainActivity : ComponentActivity() {
         val snackbar = remember { SnackbarHostState() }
         Scaffold(
             snackbarHost = {
-                SnackbarHost(snackbar)},
+                SnackbarHost(snackbar)
+            },
             floatingActionButton = {
                 if (showFAB.value) {
                     FloatingActionButton(
-                        onClick = { navController.navigate("map") },
+                        onClick = {
+                            navController.navigate("map")
+                        },
                         containerColor = colorGradient1,
                         shape = CircleShape
                     ) {
@@ -113,7 +116,7 @@ class MainActivity : ComponentActivity() {
                 Column(
                     Modifier.padding(innerPadding)
                 ) {
-                    SetupNavHost(navController,showFAB,snackbar)
+                    SetupNavHost(navController, showFAB, snackbar)
                 }
             }
         )
