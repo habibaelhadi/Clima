@@ -19,6 +19,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -85,7 +87,10 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ScaffoldSample(showFAB: MutableState<Boolean>) {
         val navController = rememberNavController()
+        val snackbar = remember { SnackbarHostState() }
         Scaffold(
+            snackbarHost = {
+                SnackbarHost(snackbar)},
             floatingActionButton = {
                 if (showFAB.value) {
                     FloatingActionButton(
@@ -108,7 +113,7 @@ class MainActivity : ComponentActivity() {
                 Column(
                     Modifier.padding(innerPadding)
                 ) {
-                    SetupNavHost(navController,showFAB)
+                    SetupNavHost(navController,showFAB,snackbar)
                 }
             }
         )

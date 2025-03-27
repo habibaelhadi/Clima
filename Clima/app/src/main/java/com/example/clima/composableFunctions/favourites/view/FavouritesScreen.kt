@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -47,7 +48,7 @@ import com.example.clima.model.DataBaseTable
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
-import com.example.clima.ui.theme.White
+import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
@@ -57,8 +58,11 @@ import com.google.android.gms.maps.model.LatLng
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun FavouritesScreen(showFAB: MutableState<Boolean>,
-                     navigateToDetails: (Double,Double) -> Unit) {
+fun FavouritesScreen(
+    showFAB: MutableState<Boolean>,
+    snackbar: SnackbarHostState,
+    navigateToDetails: (Double, Double) -> Unit
+) {
 
     val favFactory = FavouriteViewModel.FavFactory(
         WeatherRepo.getInstance(
@@ -91,7 +95,7 @@ fun FavouritesScreen(showFAB: MutableState<Boolean>,
             if (data.isEmpty()) {
                 NoFavourites()
             } else {
-                FavouritesList(data,viewModel,navigateToDetails)
+                FavouritesList(data, viewModel, navigateToDetails,snackbar)
             }
         }
     }
@@ -104,7 +108,8 @@ fun NoFavourites() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
@@ -140,15 +145,17 @@ fun NoFavourites() {
 fun FavouritesList(
     data: List<DataBaseTable>,
     viewModel: FavouriteViewModel,
-    navigateToDetails: (Double, Double) -> Unit
+    navigateToDetails: (Double, Double) -> Unit,
+    snackbar: SnackbarHostState
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
-    ){
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
@@ -175,9 +182,9 @@ fun FavouritesList(
                 .fillMaxWidth()
                 .heightIn(min = 200.dp, max = 400.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
-        ){
-            items(data.size){
-                FavouriteCard(data[it],viewModel,navigateToDetails)
+        ) {
+            items(data.size) {
+                FavouriteCard(data[it], viewModel, navigateToDetails,snackbar)
             }
         }
     }
@@ -187,53 +194,76 @@ fun FavouritesList(
 fun FavouriteCard(
     data: DataBaseTable,
     viewModel: FavouriteViewModel,
-    navigateToDetails: (Double, Double) -> Unit
+    navigateToDetails: (Double, Double) -> Unit,
+    snackbar: SnackbarHostState
 ) {
     val context = LocalContext.current
-    val country = GeocoderHelper(context). getLocationInfo(
-        LatLng(data.latitude,data.longitude)
+    val country = GeocoderHelper(context).getLocationInfo(
+        LatLng(data.latitude, data.longitude)
     )
-    Card (
-        modifier = Modifier
-            .clickable {
-                navigateToDetails(data.latitude,data.longitude)
-            }
-            .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp
-            ),
-        shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-
-    ){
-        Box(
+    SwipeToDeleteContainer(
+        item = data ,
+        onDelete = { item ->
+            viewModel.deleteFavouriteCity(item)
+        },
+        onRestore = {
+            viewModel.getFavouriteCities()
+        },
+        snackbarHostState = snackbar
+    ) {
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .background(brush = Brush.verticalGradient(
-                    colors = listOf(colorGradient3, colorGradient2, colorGradient1)
-                ))
-        ){
-            Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Image(
-                    painter = painterResource(R.drawable.country),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(36.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = country.country.toString(),
-                    fontFamily = FontFamily(Font(R.font.exo2)),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White
-                )
+                .clickable {
+                    navigateToDetails(data.latitude, data.longitude)
+                }
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp
+                ),
+            shape = RoundedCornerShape(32.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(colorGradient3, colorGradient2, colorGradient1)
+                        )
+                    )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.country),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column() {
+                        Text(
+                            text = country.city.toString(),
+                            fontFamily = FontFamily(Font(R.font.exo2)),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Gray
+                        )
+                        Text(
+                            text = country.country.toString(),
+                            fontFamily = FontFamily(Font(R.font.exo2)),
+                            fontSize = 18.sp,
+                            color = Gray
+                        )
+                    }
+                }
             }
         }
     }
 }
+
