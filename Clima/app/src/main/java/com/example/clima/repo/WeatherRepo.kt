@@ -2,7 +2,7 @@ package com.example.clima.repo
 
 import com.example.clima.local.IWeatherLocalDataSource
 import com.example.clima.model.CurrentWeather
-import com.example.clima.model.DataBaseTable
+import com.example.clima.model.FavouritePOJO
 import com.example.clima.model.ForeCast
 import com.example.clima.remote.IWeatherRemoteDataSource
 import com.example.clima.remote.WeatherRemoteDataSource
@@ -31,15 +31,15 @@ class WeatherRepo private constructor(
         return weatherRemoteDataSource.getForecast(latitude,longitude,units,lang)
     }
 
-    override suspend fun insertWeather(weather: DataBaseTable) {
+    override suspend fun insertWeather(weather: FavouritePOJO) {
         weatherLocalDataSource.insertWeather(weather)
     }
 
-    override suspend fun deleteWeather(weather: DataBaseTable) {
+    override suspend fun deleteWeather(weather: FavouritePOJO) {
         weatherLocalDataSource.deleteWeather(weather)
     }
 
-    override fun getWeather(): Flow<List<DataBaseTable>> {
+    override fun getWeather(): Flow<List<FavouritePOJO>> {
         return weatherLocalDataSource.getWeather()
     }
 

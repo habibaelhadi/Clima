@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.clima.model.DataBaseTable
+import androidx.room.TypeConverters
+import com.example.clima.model.FavouritePOJO
+import com.example.clima.utilites.Converter
 
-@Database(entities = [DataBaseTable::class], version = 1)
+@TypeConverters(Converter::class)
+@Database(entities = [FavouritePOJO::class], version = 3,exportSchema = false)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun weatherDao(): WeatherDao
@@ -23,7 +26,9 @@ abstract class AppDataBase : RoomDatabase() {
                     context.applicationContext,
                     AppDataBase::class.java,
                     DATABASE_NAME
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
