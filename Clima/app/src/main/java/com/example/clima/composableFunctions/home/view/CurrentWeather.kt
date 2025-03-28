@@ -39,16 +39,22 @@ import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.displayDate
+import com.example.clima.utilites.formatNumberBasedOnLanguage
 
 @Composable
 fun CurrentWeather(
     modifier: Modifier = Modifier,
     weatherResponse : CurrentWeather
 ) {
-    val temp = weatherResponse.main.temp.toInt().toString()
-    val feelsLike = weatherResponse.main.feels_like.toInt().toString()
+    val tempActual = weatherResponse.main.temp.toInt().toString()
+    val temp = formatNumberBasedOnLanguage(tempActual)
+
+    val feelsLikeActual = weatherResponse.main.feels_like.toInt().toString()
+    val feelsLike = formatNumberBasedOnLanguage(feelsLikeActual)
+
     val foreCast = weatherResponse.weather[0].description
-    val date = displayDate(weatherResponse.dt.toLong(), "EEEE, dd MMMM")
+    val displayDate = displayDate(weatherResponse.dt.toLong(), "EEEE, dd MMMM")
+    val date = formatNumberBasedOnLanguage(displayDate)
     val lottieCondition = detectLottie(weatherResponse.weather[0].icon)
     val iconCondition = detectIcon(weatherResponse.weather[0].icon)
 
@@ -158,7 +164,9 @@ private fun ForeCastValue(
                 ), modifier = Modifier.padding(16.dp)
             )
             Text(
-                text = stringResource(R.string.degree), fontFamily = FontFamily(Font(R.font.exo2)), style = TextStyle(
+                text = stringResource(R.string.degree),
+                fontFamily = FontFamily(Font(R.font.exo2)),
+                style = TextStyle(
                     brush = Brush.linearGradient(
                         0f to White, 1f to White.copy(alpha = 0.3f)
                     ), fontSize = 70.sp, fontWeight = FontWeight.Light

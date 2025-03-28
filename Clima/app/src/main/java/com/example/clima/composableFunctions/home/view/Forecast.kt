@@ -45,6 +45,7 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.ForecastItem
 import com.example.clima.utilites.convertAPIResponse
+import com.example.clima.utilites.formatNumberBasedOnLanguage
 import com.example.clima.utilites.fromHex
 
 @Composable
@@ -162,13 +163,15 @@ private fun ForecastCard(
         Spacer(modifier = Modifier.height(8.dp))
         WeatherIcon(icon = item.icon)
         Spacer(modifier = Modifier.height(6.dp))
+        val temp = formatNumberBasedOnLanguage(item.temp)
         Text(
-            text = item.temp+stringResource(R.string.degree),
+            text = temp+stringResource(R.string.degree),
             style = tempTextStyle
         )
         Spacer(modifier = Modifier.height(8.dp))
+        val airQuality = formatNumberBasedOnLanguage(item.airQuality)
         AirQualityIndicator(
-            value = item.airQuality,
+            value = airQuality,
             color = item.airQualityIndicatorColor
         )
     }

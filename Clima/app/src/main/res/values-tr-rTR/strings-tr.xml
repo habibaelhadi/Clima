@@ -25,4 +25,11 @@
     <string name="humidity">Nem</string>
     <string name="air_pressure">Hava Basıncı</string>
     <string name="clouds">Bulutlar</string>
+    <string name="start_date">Başlangıç Tarihi</string>
+    <string name="start_time">Başlangıç Saati</string>
+    <string name="end_time">Bitiş Saati</string>
+    <string name="alarm">Alarm</string>
+    <string name="notification">Bildirim</string>
+    <string name="notify_me_by">Beni şu şekilde bilgilendir:</string>
+    <string name="save">KAYDET</string>
 </resources>
