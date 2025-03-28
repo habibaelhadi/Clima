@@ -44,23 +44,20 @@ class MapViewModel(private val placesClient: PlacesClient,
     private val mutableMessage = MutableSharedFlow<String>()
     val message = mutableMessage.asSharedFlow()
 
-    // Update search query and fetch predictions
     fun onSearchQueryChanged(query: String) {
         mutableSearchText.value = query
         fetchPredictions(query)
     }
 
-    //Fetch place details when a prediction is selected
     fun onPlaceSelected(placeId: String) {
         fetchPlaceDetails(placeId)
-        mutableSearchText.value = "" // Clear search text after selection
-        mutablePredictions.value = emptyList() // Clear predictions
+        mutableSearchText.value = ""
+        mutablePredictions.value = emptyList()
     }
 
-    // Fetch autocomplete predictions
     private fun fetchPredictions(query: String) {
         if (query.isEmpty()) {
-            mutablePredictions.value = emptyList() // Clear predictions when input is empty
+            mutablePredictions.value = emptyList()
             return
         }
 
@@ -79,7 +76,6 @@ class MapViewModel(private val placesClient: PlacesClient,
         }
     }
 
-    // Fetch place details
     fun fetchPlaceDetails(placeId: String) {
         val placeFields = listOf(Place.Field.LAT_LNG)
         val request = FetchPlaceRequest.builder(placeId, placeFields).build()

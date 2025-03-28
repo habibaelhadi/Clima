@@ -35,8 +35,8 @@ import com.example.clima.R
 import com.example.clima.ui.theme.colorGradient1
 
 @Composable
-fun AlarmsScreen(showFAB: MutableState<Boolean>) {
-    showFAB.value = false
+fun AlarmsScreen() {
+
     var isSheetOpen = remember { mutableStateOf(false) }
 
     Scaffold(

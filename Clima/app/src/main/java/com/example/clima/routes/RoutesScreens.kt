@@ -22,10 +22,7 @@ sealed class RoutesScreens (val route: String, val label: String, val icon: Int)
     object Map : RoutesScreens("map","Map", R.drawable.baseline_location_pin_24)
 
     @Serializable
-    object FavouriteDetails : RoutesScreens("favDetails/{lat}/{lng}", "Details", R.drawable.country) {
-        fun route(lat: Double, lng: Double) = "favDetails/$lat/$lng"
+    object FavouriteDetails : RoutesScreens("favDetails/{location}", "Details", R.drawable.country) {
+        fun route(location: String) = "favDetails/$location"
     }
-
-    @Serializable
-    object AlarmsDetails : RoutesScreens("alarmsDetails", "Details", R.drawable.country)
 }
