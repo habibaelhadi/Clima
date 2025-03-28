@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Clima</string>
+    <string name="clima">Clima</string>
+    <string name="updating">Güncelleniyor..</string>
+    <string name="air_quality">Hava Kalitesi</string>
+    <string name="degree">°</string>
+    <string name="feels_like">Hissedilen: %1$s</string>
+    <string name="weekly_forecast">Haftalık Tahmin</string>
+    <string name="today_weather">Bugünün Havası</string>
+    <string name="set_an_alert">Uyarı Ayarla</string>
+    <string name="close">Kapat</string>
+    <string name="alarms">Alarmlar</string>
+    <string name="favourites">Favoriler</string>
+    <string name="add_to_favourites">Favorilere Ekle</string>
+    <string name="latitude">Enlem: %1$s</string>
+    <string name="longitude">Boylam: %1$s</string>
+    <string name="language">Dil</string>
+    <string name="selected_language">Seçilen Dil</string>
+    <string name="location">Konum</string>
+    <string name="selected_location">Seçilen Konum</string>
+    <string name="units">Birimler</string>
+    <string name="temperature">Sıcaklık</string>
+    <string name="wind">Rüzgar</string>
+    <string name="wind_speed">Rüzgar Hızı</string>
+    <string name="humidity">Nem</string>
+    <string name="air_pressure">Hava Basıncı</string>
+    <string name="clouds">Bulutlar</string>
+</resources>

@@ -1,4 +1,28 @@
 <resources>
     <string name="app_name">Clima</string>
     <string name="clima">Clima</string>
+    <string name="updating">Updating..</string>
+    <string name="air_quality">Air Quality</string>
+    <string name="degree">°</string>
+    <string name="feels_like">Feels like %1$s</string>
+    <string name="weekly_forecast">Weekly Forecast</string>
+    <string name="today_weather">Today Weather</string>
+    <string name="set_an_alert">Set an Alert</string>
+    <string name="close">Close</string>
+    <string name="alarms">Alarms</string>
+    <string name="favourites">Favourites</string>
+    <string name="add_to_favourites">Add to Favourites</string>
+    <string name="latitude">Latitude: %1$s</string>
+    <string name="longitude">Longitude: %1$s</string>
+    <string name="language">Language</string>
+    <string name="selected_language">Selected Language</string>
+    <string name="location">Location</string>
+    <string name="selected_location">Selected Location</string>
+    <string name="units">Units</string>
+    <string name="temperature">Temperature</string>
+    <string name="wind">Wind</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="humidity">Humidity</string>
+    <string name="air_pressure">Air Pressure</string>
+    <string name="clouds">Clouds</string>
 </resources>

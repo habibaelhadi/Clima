@@ -16,9 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clima.R
@@ -27,24 +27,22 @@ import com.example.clima.ui.theme.Black
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.PurpleGrey40
 import com.example.clima.utilites.AirQualityItem
-import com.example.clima.utilites.airItems
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AirQuality(
     modifier: Modifier = Modifier,
-    data: List<AirQualityItem> = airItems,
+    data: List<AirQualityItem>,
     airQuality : CurrentWeather
 ) {
     val humidity = airQuality.main.humidity.toString()
     val pressure = airQuality.main.pressure.toString()
     val windSpeed = airQuality.wind.speed.toString()
     val clouds = airQuality.clouds.all.toString()
-
-    airItems[0].value = windSpeed
-    airItems[1].value = humidity
-    airItems[2].value = pressure
-    airItems[3].value = clouds
+    data[0].value = windSpeed
+    data[1].value = pressure
+    data[2].value = humidity
+    data[3].value = clouds
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -67,7 +65,8 @@ fun AirQuality(
                 data.onEach { item ->
                     AirQualityInfo(
                         data = item,
-                        modifier = Modifier.weight(weight = 1f)
+                        modifier = Modifier
+                            .weight(weight = 1f)
                             .padding(vertical = 4.dp)
                     )
                 }
@@ -97,7 +96,7 @@ private fun AirQualityHeader(
                 modifier = Modifier.size(32.dp)
             )
             Text(
-                text = "Air Quality",
+                text = stringResource(R.string.air_quality),
                 color = Black,
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.exo2))

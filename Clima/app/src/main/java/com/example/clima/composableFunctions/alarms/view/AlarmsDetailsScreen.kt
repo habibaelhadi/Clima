@@ -14,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.clima.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +44,7 @@ fun BottomSheetContent(onDismiss: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Set an Alert",
+            text = stringResource(R.string.set_an_alert),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
@@ -50,7 +52,7 @@ fun BottomSheetContent(onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(onClick = onDismiss) {
-            Text("Close")
+            Text(stringResource(R.string.close))
         }
     }
 }

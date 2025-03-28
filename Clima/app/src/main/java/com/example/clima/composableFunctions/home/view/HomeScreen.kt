@@ -1,5 +1,6 @@
 package com.example.clima.composableFunctions.home.view
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,13 +21,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.clima.R
 import com.example.clima.composableFunctions.home.viewmodel.HomeViewModel
 import com.example.clima.local.AppDataBase
@@ -46,23 +55,63 @@ import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
+import com.example.clima.utilites.ConnectivityObserver
 import com.example.clima.utilites.Response
+import com.example.clima.utilites.checkForInternet
+import com.example.clima.utilites.getAirItems
+import com.example.clima.utilites.getLanguageCode
 
 
 @Composable
 fun HomeScreen() {
     val homeFactory =
-        HomeViewModel.HomeFactory(WeatherRepo.getInstance(
-            WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()))
+        HomeViewModel.HomeFactory(
+            WeatherRepo.getInstance(
+                WeatherRemoteDataSource(RetrofitProduct.retrofit),
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+            )
         )
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
-    viewModel.getWeather()
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+    val language = getLanguageCode(savedLanguage).toString()
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
 
+    val connectivityObserver = remember { ConnectivityObserver(context) }
+    val isConnected by connectivityObserver.isConnected.collectAsStateWithLifecycle(
+        initialValue = checkForInternet(
+            context
+        )
+    )
+    LaunchedEffect(isConnected, language) {
+        if (isConnected) {
+            viewModel.getWeather(language)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        when (uiState) {
-            is Response.Loading -> {
+        when {
+            !isConnected -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+
+                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wind))
+                    val progress by animateLottieCompositionAsState(
+                        composition = composition, iterations = LottieConstants.IterateForever
+                    )
+
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+
+            uiState is Response.Loading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -70,13 +119,14 @@ fun HomeScreen() {
                 ) { CircularProgressIndicator() }
             }
 
-            is Response.Failure -> {
+            uiState is Response.Failure -> {
                 val error = (uiState as Response.Failure).error
                 Log.e("TAG", "HomeScreen: $error")
             }
 
-            is Response.Success -> {
-                val (currentWeather, forecast,hourly) = (uiState as Response.Success).data
+            uiState is Response.Success -> {
+                val (currentWeather, forecast, hourly) = (uiState as Response.Success).data
+                val data = getAirItems(context)
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
@@ -92,7 +142,8 @@ fun HomeScreen() {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
-                        airQuality = currentWeather
+                        airQuality = currentWeather,
+                        data = data
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
@@ -160,7 +211,7 @@ private fun ProgressBar(
             .padding(vertical = 2.dp, horizontal = 10.dp)
     ) {
         Text(
-            text = "Updating..",
+            text = stringResource(R.string.updating),
             fontSize = 12.sp,
             fontFamily = FontFamily(Font(R.font.exo2)),
             color = Gray

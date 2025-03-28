@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -64,7 +64,7 @@ private fun HourlyHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Today Weather",
+            text = stringResource(R.string.today_weather),
             style = MaterialTheme.typography.titleLarge,
             fontFamily = FontFamily(Font(R.font.exo2)),
             fontSize = 20.sp,
@@ -97,7 +97,7 @@ private fun HourlyCard(
             painter = painterResource(data.icon),
             contentDescription = null,
             modifier = Modifier
-                .padding(start =  32.dp)
+                .padding(start = 32.dp)
                 .size(45.dp)
         )
         Text(
@@ -109,7 +109,7 @@ private fun HourlyCard(
                 .padding(start = 16.dp)
         )
         Text(
-            text = "${data.temp}°",
+            text = data.temp+stringResource(R.string.degree),
             color = Black,
             fontSize = 14.sp,
             modifier = Modifier

@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -167,8 +168,8 @@ fun MapScreen() {
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Latitude: ${location.latitude}")
-                        Text(text = "Longitude: ${location.longitude}")
+                        Text(text = stringResource(R.string.latitude, location.latitude))
+                        Text(text = stringResource(R.string.longitude, location.longitude))
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Button(
@@ -185,7 +186,7 @@ fun MapScreen() {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "Add to Favourites",
+                                text = stringResource(R.string.add_to_favourites),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colorResource(R.color.white),
                                 fontWeight = FontWeight.Bold

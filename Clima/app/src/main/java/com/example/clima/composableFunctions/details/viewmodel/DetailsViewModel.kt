@@ -28,18 +28,18 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         _currentWeather.value = Response.Failure(throwable.message.toString())
     }
 
-    fun getWeather(lat : Double,lng : Double) {
+    fun getWeather(lat: Double, lng: Double, language: String) {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             try {
                 val current = async {
-                    weatherRepo.getCurrentWeather(lat, lng, "metric", "en")
+                    weatherRepo.getCurrentWeather(lat, lng, "metric", language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .first()
                 }
                 val forecast = async {
-                    weatherRepo.getForecast(lat, lng, "metric", "en")
+                    weatherRepo.getForecast(lat, lng, "metric", language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -50,7 +50,7 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         .firstOrNull() ?: emptyList()
                 }
                 val hourly = async {
-                    weatherRepo.getForecast(lat, lng, "metric", "en")
+                    weatherRepo.getForecast(lat, lng, "metric", language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
