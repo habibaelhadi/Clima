@@ -32,4 +32,14 @@
     <string name="notification">الإشعار</string>
     <string name="notify_me_by">أعلمني عبر:</string>
     <string name="save">حفظ</string>
+    <string name="deleted">تم الحذف</string>
+    <string name="undo">تراجع</string>
+    <string name="map">خريطة</string>
+    <string name="gps">نظام تحديد المواقع</string>
+    <string name="celsius_c">درجة مئوية (°س)</string>
+    <string name="fahrenheit_f">فهرنهايت (°ف)</string>
+    <string name="kelvin_k">كلفن (°ك)</string>
+    <string name="kilometers_per_hour_km_h">كيلومترات في الساعة (كم/س)</string>
+    <string name="miles_per_second_m_s">أميال في الثانية (م/ث)</string>
+
 </resources>

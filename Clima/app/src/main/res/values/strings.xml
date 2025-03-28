@@ -32,4 +32,13 @@
     <string name="notification">Notification</string>
     <string name="notify_me_by">Notify me by:</string>
     <string name="save">SAVE</string>
+    <string name="deleted">deleted</string>
+    <string name="undo">undo</string>
+    <string name="map">Map</string>
+    <string name="gps">GPS</string>
+    <string name="celsius_c">Celsius (°C)</string>
+    <string name="fahrenheit_f">Fahrenheit (°F)</string>
+    <string name="kelvin_k">Kelvin (°K)</string>
+    <string name="kilometers_per_hour_km_h">Kilometers per hour (km/h)</string>
+    <string name="miles_per_second_m_s">Miles per second (m/s)</string>
 </resources>

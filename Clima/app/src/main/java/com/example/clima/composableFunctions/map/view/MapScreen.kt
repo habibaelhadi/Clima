@@ -114,7 +114,7 @@ fun MapScreen() {
             ) {
                 Marker(
                     state = markerState,
-                    title = "Selected Location",
+                    title = stringResource(R.string.selected_location),
                     snippet = "Marker at selected location"
                 )
             }

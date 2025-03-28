@@ -32,4 +32,13 @@
     <string name="notification">Bildirim</string>
     <string name="notify_me_by">Beni şu şekilde bilgilendir:</string>
     <string name="save">KAYDET</string>
+    <string name="deleted">silindi</string>
+    <string name="undo">geri al</string>
+    <string name="map">Harita</string>
+    <string name="gps">GPS</string>
+    <string name="celsius_c">Santigrat (°C)</string>
+    <string name="fahrenheit_f">Fahrenheit (°F)</string>
+    <string name="kelvin_k">Kelvin (°K)</string>
+    <string name="kilometers_per_hour_km_h">Kilometre/saat (km/h)</string>
+    <string name="miles_per_second_m_s">Mil/saniye (m/s)</string>
 </resources>
