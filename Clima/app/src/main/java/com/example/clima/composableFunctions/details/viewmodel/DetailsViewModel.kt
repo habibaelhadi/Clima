@@ -8,6 +8,7 @@ import com.example.clima.model.ForeCast
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +24,12 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         MutableStateFlow<Response<Triple<CurrentWeather, List<ForeCast.ForecastWeather>,List<ForeCast.ForecastWeather>>>>(Response.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        _currentWeather.value = Response.Failure(throwable.message.toString())
+    }
+
     fun getWeather(lat : Double,lng : Double) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             try {
                 val current = async {
                     weatherRepo.getCurrentWeather(lat, lng, "metric", "en")

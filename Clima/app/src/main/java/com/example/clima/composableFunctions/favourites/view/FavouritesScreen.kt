@@ -18,10 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -57,9 +64,9 @@ import com.example.clima.utilites.Response
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun FavouritesScreen(
-    showFAB: MutableState<Boolean>,
     snackbar: SnackbarHostState,
-    navigateToDetails: (Double, Double) -> Unit
+    navigateToMap : () -> Unit,
+    navigateToDetails: (FavouritePOJO) -> Unit
 ) {
 
     val favFactory = FavouriteViewModel.FavFactory(
@@ -72,7 +79,6 @@ fun FavouritesScreen(
     val viewModel: FavouriteViewModel = viewModel(factory = favFactory)
     val uiState by viewModel.favouriteLocations.collectAsStateWithLifecycle()
     viewModel.getFavouriteCities()
-    showFAB.value = true
 
     when (uiState) {
         is Response.Failure -> {
@@ -90,11 +96,30 @@ fun FavouritesScreen(
 
         is Response.Success -> {
             val data = (uiState as Response.Success).data
-            if (data.isEmpty()) {
-                NoFavourites()
-            } else {
-                FavouritesList(data, viewModel, navigateToDetails,snackbar)
-            }
+           Scaffold(
+               floatingActionButton = {
+                       FloatingActionButton(
+                           onClick = {
+                              navigateToMap()
+                           },
+                           containerColor = colorGradient1,
+                           shape = CircleShape
+                       ) {
+                           Icon(
+                               Icons.Default.Add,
+                               contentDescription = "Favorite",
+                               tint = Color.White
+                           )
+                       }
+
+               }
+           ) { innerPadding ->
+               if (data.isEmpty()) {
+                   NoFavourites()
+               } else {
+                   FavouritesList(data, viewModel, navigateToDetails,snackbar)
+               }
+           }
         }
     }
 }
@@ -143,7 +168,7 @@ fun NoFavourites() {
 fun FavouritesList(
     data: List<FavouritePOJO>,
     viewModel: FavouriteViewModel,
-    navigateToDetails: (Double, Double) -> Unit,
+    navigateToDetails: (FavouritePOJO) -> Unit,
     snackbar: SnackbarHostState
 ) {
     Column(
@@ -192,7 +217,7 @@ fun FavouritesList(
 fun FavouriteCard(
     data: FavouritePOJO,
     viewModel: FavouriteViewModel,
-    navigateToDetails: (Double, Double) -> Unit,
+    navigateToDetails: (FavouritePOJO) -> Unit,
     snackbar: SnackbarHostState
 ) {
     SwipeToDeleteContainer(
@@ -208,7 +233,7 @@ fun FavouriteCard(
         Card(
             modifier = Modifier
                 .clickable {
-                    navigateToDetails(data.latitude, data.longitude)
+                    navigateToDetails(data)
                 }
                 .fillMaxWidth()
                 .padding(

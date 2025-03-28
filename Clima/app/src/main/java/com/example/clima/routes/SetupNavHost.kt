@@ -1,8 +1,8 @@
 package com.example.clima.routes
 
+import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,12 +14,13 @@ import com.example.clima.composableFunctions.favourites.view.FavouritesScreen
 import com.example.clima.composableFunctions.home.view.HomeScreen
 import com.example.clima.composableFunctions.map.view.MapScreen
 import com.example.clima.composableFunctions.settings.view.SettingsScreen
+import com.example.clima.model.FavouritePOJO
+import com.google.gson.Gson
 
 
 @Composable
 fun SetupNavHost(
     navController: NavHostController,
-    showFAB: MutableState<Boolean>,
     snackbar: SnackbarHostState
 ){
     NavHost(
@@ -27,22 +28,27 @@ fun SetupNavHost(
         startDestination = RoutesScreens.Home.route
     ){
         composable(RoutesScreens.Home.route){
-            HomeScreen(showFAB)
+            HomeScreen()
         }
 
         composable(RoutesScreens.Favourites.route){
-            FavouritesScreen(showFAB, snackbar,
-                navigateToDetails = {lat,lng ->
-                navController.navigate(RoutesScreens.FavouriteDetails.route(lat,lng))
+            FavouritesScreen( snackbar,
+                navigateToMap = {
+                    navController.navigate(RoutesScreens.Map.route)
+                },
+                navigateToDetails = {location ->
+                    val gson = Gson()
+                    val jsonString = gson.toJson(location)
+                navController.navigate(RoutesScreens.FavouriteDetails.route(jsonString))
             })
         }
 
         composable(RoutesScreens.Alarms.route){
-            AlarmsScreen(showFAB)
+            AlarmsScreen()
         }
 
         composable(RoutesScreens.Settings.route){
-            SettingsScreen(showFAB)
+            SettingsScreen()
         }
 
         composable(RoutesScreens.Map.route){
@@ -52,14 +58,21 @@ fun SetupNavHost(
         composable(
             route = RoutesScreens.FavouriteDetails.route,
             arguments = listOf(
-                navArgument("lat") { type = NavType.FloatType },
-                navArgument("lng") { type = NavType.FloatType }
+                navArgument("location") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val latitude = backStackEntry.arguments?.getFloat("lat") ?: 30.0444
-            val longitude = backStackEntry.arguments?.getFloat("lng") ?: 31.2357
-            DetailsScreen(showFAB, latitude, longitude)
+            val jsonString = backStackEntry.arguments?.getString("location")
+            val location = try {
+                Gson().fromJson(jsonString, FavouritePOJO::class.java)
+            } catch (e: Exception) {
+                null
+            }
+            if (location != null) {
+                Log.i("TAG", "SetupNavHost: ${location.forecast.list}")
+                DetailsScreen(location)
+            } else {
+                Log.e("TAG", "Location data is null")
+            }
         }
-
     }
 }

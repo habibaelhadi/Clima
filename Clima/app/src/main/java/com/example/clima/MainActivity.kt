@@ -12,11 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -25,14 +20,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -58,12 +51,11 @@ import np.com.susanthapa.curved_bottom_navigation.CurvedBottomNavigationView
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var showFAB: MutableState<Boolean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            showFAB = remember { mutableStateOf(false) }
+
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -78,36 +70,19 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    ScaffoldSample(showFAB)
+                    ScaffoldSample()
                 }
             }
         }
     }
 
     @Composable
-    fun ScaffoldSample(showFAB: MutableState<Boolean>) {
+    fun ScaffoldSample() {
         val navController = rememberNavController()
         val snackbar = remember { SnackbarHostState() }
         Scaffold(
             snackbarHost = {
                 SnackbarHost(snackbar)
-            },
-            floatingActionButton = {
-                if (showFAB.value) {
-                    FloatingActionButton(
-                        onClick = {
-                            navController.navigate("map")
-                        },
-                        containerColor = colorGradient1,
-                        shape = CircleShape
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = "Favorite",
-                            tint = Color.White
-                        )
-                    }
-                }
             },
             bottomBar = {
                 CurvedNavBar(navController)
@@ -116,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 Column(
                     Modifier.padding(innerPadding)
                 ) {
-                    SetupNavHost(navController, showFAB, snackbar)
+                    SetupNavHost(navController, snackbar)
                 }
             }
         )

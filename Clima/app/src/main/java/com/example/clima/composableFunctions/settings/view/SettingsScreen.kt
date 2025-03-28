@@ -41,8 +41,8 @@ import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 
 @Composable
-fun SettingsScreen(showFAB: MutableState<Boolean>) {
-    showFAB.value = false
+fun SettingsScreen() {
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -74,7 +74,7 @@ fun LanguageSettingsScreen() {
 
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
-        SettingRow("Selected Language", listOf("English", "العربية"))
+        SettingRow("Selected Language", listOf("English", "العربية","Türkiye"))
 
         Spacer(modifier = Modifier.height(16.dp))
 
