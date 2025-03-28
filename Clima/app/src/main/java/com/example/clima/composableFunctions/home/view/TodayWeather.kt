@@ -27,6 +27,7 @@ import com.example.clima.model.ForeCast
 import com.example.clima.ui.theme.Black
 import com.example.clima.utilites.ForecastItem
 import com.example.clima.utilites.convertAPIResponse
+import com.example.clima.utilites.formatNumberBasedOnLanguage
 
 @Composable
 fun HourlyWeather(
@@ -88,8 +89,9 @@ private fun HourlyCard(
             ),
         verticalAlignment = Alignment.CenterVertically
     ){
+        val hour = formatNumberBasedOnLanguage(data.hour)
         Text(
-            text = data.hour,
+            text = hour,
             color = Black,
             fontSize = 14.sp
         )
@@ -108,8 +110,9 @@ private fun HourlyCard(
                 .weight(1f)
                 .padding(start = 16.dp)
         )
+        val temp = formatNumberBasedOnLanguage(data.temp)
         Text(
-            text = data.temp+stringResource(R.string.degree),
+            text = temp+stringResource(R.string.degree),
             color = Black,
             fontSize = 14.sp,
             modifier = Modifier

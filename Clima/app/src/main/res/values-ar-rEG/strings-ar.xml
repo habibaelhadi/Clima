@@ -25,4 +25,11 @@
     <string name="humidity">الرطوبة</string>
     <string name="air_pressure">الضغط الجوي</string>
     <string name="clouds">الغيوم</string>
+    <string name="start_date">تاريخ البدء</string>
+    <string name="start_time">وقت البدء</string>
+    <string name="end_time">وقت الانتهاء</string>
+    <string name="alarm">المنبه</string>
+    <string name="notification">الإشعار</string>
+    <string name="notify_me_by">أعلمني عبر:</string>
+    <string name="save">حفظ</string>
 </resources>

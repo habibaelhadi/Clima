@@ -27,6 +27,7 @@ import com.example.clima.ui.theme.Black
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.PurpleGrey40
 import com.example.clima.utilites.AirQualityItem
+import com.example.clima.utilites.formatNumberBasedOnLanguage
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,10 +36,15 @@ fun AirQuality(
     data: List<AirQualityItem>,
     airQuality : CurrentWeather
 ) {
-    val humidity = airQuality.main.humidity.toString()
-    val pressure = airQuality.main.pressure.toString()
-    val windSpeed = airQuality.wind.speed.toString()
-    val clouds = airQuality.clouds.all.toString()
+    val humidityActual = airQuality.main.humidity.toString()
+    val humidity = formatNumberBasedOnLanguage(humidityActual)
+    val pressureActual = airQuality.main.pressure.toString()
+    val pressure = formatNumberBasedOnLanguage(pressureActual)
+    val windSpeedActual = airQuality.wind.speed.toString()
+    val windSpeed = formatNumberBasedOnLanguage(windSpeedActual)
+    val cloudsActual = airQuality.clouds.all.toString()
+    val clouds = formatNumberBasedOnLanguage(cloudsActual)
+
     data[0].value = windSpeed
     data[1].value = pressure
     data[2].value = humidity
