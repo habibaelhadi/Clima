@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Clima</string>
+    <string name="clima">Clima</string>
+    <string name="updating">جارٍ التحديث..</string>
+    <string name="air_quality">جودة الهواء</string>
+    <string name="degree">°</string>
+    <string name="feels_like">يبدو وكأنه %1$s</string>
+    <string name="weekly_forecast">توقعات الأسبوع</string>
+    <string name="today_weather">طقس اليوم</string>
+    <string name="set_an_alert">ضبط تنبيه</string>
+    <string name="close">إغلاق</string>
+    <string name="alarms">التنبيهات</string>
+    <string name="favourites">المفضلة</string>
+    <string name="add_to_favourites">إضافة إلى المفضلة</string>
+    <string name="latitude">خط العرض: %1$s</string>
+    <string name="longitude">خط الطول: %1$s</string>
+    <string name="language">اللغة</string>
+    <string name="selected_language">اللغة المختارة</string>
+    <string name="location">الموقع</string>
+    <string name="selected_location">الموقع المختار</string>
+    <string name="units">الوحدات</string>
+    <string name="temperature">درجة الحرارة</string>
+    <string name="wind">الرياح</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="air_pressure">الضغط الجوي</string>
+    <string name="clouds">الغيوم</string>
+</resources>

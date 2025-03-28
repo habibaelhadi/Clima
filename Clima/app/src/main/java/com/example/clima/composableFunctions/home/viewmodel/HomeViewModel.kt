@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
@@ -24,18 +23,20 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         MutableStateFlow<Response<Triple<CurrentWeather, List<ForeCast.ForecastWeather>,List<ForeCast.ForecastWeather>>>>(Response.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
-    fun getWeather() {
+
+    fun getWeather(savedLanguage: String) {
         viewModelScope.launch(Dispatchers.IO) {
+
             try {
                 val current = async {
-                    weatherRepo.getCurrentWeather(31.252321, 29.992283, "metric", "en")
+                    weatherRepo.getCurrentWeather(31.252321, 29.992283, "metric", savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .first()
                 }
                 val forecast = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, "metric", "en")
+                    weatherRepo.getForecast(31.252321, 29.992283, "metric", savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -46,7 +47,7 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         .firstOrNull() ?: emptyList()
                 }
                 val hourly = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, "metric", "en")
+                    weatherRepo.getForecast(31.252321, 29.992283, "metric", savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }

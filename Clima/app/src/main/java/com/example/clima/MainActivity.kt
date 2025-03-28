@@ -1,5 +1,6 @@
 package com.example.clima
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
@@ -45,24 +46,29 @@ import com.example.clima.routes.SetupNavHost
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.White
 import com.example.clima.ui.theme.colorGradient1
+import com.example.clima.utilites.setLocale
 import kotlinx.coroutines.delay
 import np.com.susanthapa.curved_bottom_navigation.CbnMenuItem
 import np.com.susanthapa.curved_bottom_navigation.CurvedBottomNavigationView
 
 class MainActivity : ComponentActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
 
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+        val skipSplash = sharedPreferences.getBoolean("skip_splash", false)
+
+        setLocale(this, savedLanguage)
+
+        setContent {
+            var showSplash by remember { mutableStateOf(!skipSplash) }
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                var showSplash by remember { mutableStateOf(true) }
-
                 if (showSplash) {
                     SplashScreen(
                         onAnimationComplete = {
@@ -74,6 +80,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        sharedPreferences.edit().putBoolean("skip_splash", false).apply()
     }
 
     @Composable

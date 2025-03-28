@@ -1,5 +1,6 @@
 package com.example.clima.composableFunctions.details.view
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,8 @@ import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import com.example.clima.utilites.getAirItems
+import com.example.clima.utilites.getLanguageCode
 
 @Composable
 fun DetailsScreen(
@@ -48,10 +51,15 @@ fun DetailsScreen(
             )
         )
     val viewModel: DetailsViewModel = viewModel(factory = detailsFactory)
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+    val language = getLanguageCode(savedLanguage).toString()
     LaunchedEffect (location){
-        viewModel.getWeather(location.latitude, location.longitude)
+        viewModel.getWeather(location.latitude, location.longitude,language)
     }
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
+    val data = getAirItems(context)
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (uiState) {
@@ -80,7 +88,8 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
-                        airQuality = location.currentWeather
+                        airQuality = location.currentWeather,
+                        data = data
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
@@ -116,7 +125,8 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
-                        airQuality = currentWeather
+                        airQuality = currentWeather,
+                        data = data
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(

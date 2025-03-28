@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -157,7 +158,7 @@ private fun ForeCastValue(
                 ), modifier = Modifier.padding(16.dp)
             )
             Text(
-                text = "°", fontFamily = FontFamily(Font(R.font.exo2)), style = TextStyle(
+                text = stringResource(R.string.degree), fontFamily = FontFamily(Font(R.font.exo2)), style = TextStyle(
                     brush = Brush.linearGradient(
                         0f to White, 1f to White.copy(alpha = 0.3f)
                     ), fontSize = 70.sp, fontWeight = FontWeight.Light
@@ -165,7 +166,7 @@ private fun ForeCastValue(
             )
         }
         Text(
-            text = "Feels like $description",
+            text = stringResource(R.string.feels_like, description),
             fontFamily = FontFamily(Font(R.font.exo2)),
             fontSize = 16.sp,
             color = Gray,

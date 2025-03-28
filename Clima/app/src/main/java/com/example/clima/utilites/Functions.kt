@@ -50,3 +50,28 @@ fun checkForInternet(context: Context): Boolean {
         return networkInfo.isConnected
     }
 }
+
+fun setLocale(context: Context, language: String) {
+    val locale = getLanguageCode(language)
+
+    Locale.setDefault(locale)
+
+    val config = context.resources.configuration
+    config.setLocale(locale)
+    context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    sharedPreferences.edit()
+        .putString("app_language", language)
+        .putBoolean("skip_splash", true)
+        .apply()
+}
+
+fun getLanguageCode(language: String) : Locale{
+    return when (language) {
+        "English" -> Locale("en")
+        "العربية" -> Locale("ar")
+        "Türkiye" -> Locale("tr")
+        else -> Locale.getDefault()
+    }
+}
