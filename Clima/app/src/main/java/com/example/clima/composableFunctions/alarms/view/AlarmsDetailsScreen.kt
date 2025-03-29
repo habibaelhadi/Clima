@@ -55,7 +55,8 @@ fun AlarmsDetails(isSheetOpen: MutableState<Boolean>) {
     if (isSheetOpen.value) {
         ModalBottomSheet(
             onDismissRequest = { isSheetOpen.value = false },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = colorGradient1
         ) {
             BottomSheetContent(context) { isSheetOpen.value = false }
         }
