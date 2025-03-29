@@ -126,7 +126,10 @@ fun LocationSettingsScreen() {
 
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
-        SettingRow(stringResource(R.string.selected_location), listOf("GPS", "Map"),"GPS")
+        SettingRow(stringResource(R.string.selected_location), listOf(
+            stringResource(R.string.gps),
+            stringResource(R.string.map)),
+            stringResource(R.string.gps))
 
         Spacer(modifier = Modifier.height(16.dp))
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
@@ -155,11 +158,16 @@ fun UnitsSettingsScreen() {
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
         SettingRow(stringResource(R.string.temperature),
-            listOf("Celsius (°C)", "Fahrenheit (°F)", "Kelvin (°K)"),
-            defaultValue = "Celsius (°C)")
+            listOf(stringResource(R.string.celsius_c),
+                stringResource(R.string.fahrenheit_f),
+                stringResource(R.string.kelvin_k)
+            ),
+            defaultValue = stringResource(R.string.celsius_c))
         SettingRow(stringResource(R.string.wind),
-            listOf("Kilometers per hour (km/h)", "Miles per hour (mph)"),
-            defaultValue = "Kilometers per hour (km/h)")
+            listOf(stringResource(R.string.kilometers_per_hour_km_h),
+                stringResource(R.string.miles_per_second_m_s)
+            ),
+            defaultValue = stringResource(R.string.kilometers_per_hour_km_h))
 
         Spacer(modifier = Modifier.height(16.dp))
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)

@@ -101,4 +101,7 @@ dependencies {
     // Android Maps Compose composables for the Maps SDK for Android
     implementation("com.google.maps.android:maps-compose:6.4.1")
     implementation("com.google.maps.android:places-compose:0.1.2")
+
+    //for Kotlin + workManager
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
 }

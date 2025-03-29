@@ -28,7 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.clima.R
 import com.example.clima.ui.theme.White
 
 @Composable
@@ -43,6 +45,8 @@ fun <T> SwipeToDeleteContainer(
 
     var isRemoved by remember { mutableStateOf(false) }
     var canSwipe by remember { mutableStateOf(true) }
+
+    val context = LocalContext.current
 
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
@@ -59,8 +63,8 @@ fun <T> SwipeToDeleteContainer(
     LaunchedEffect(isRemoved) {
         if (isRemoved) {
             val result = snackbarHostState.showSnackbar(
-                message = "deleted",
-                actionLabel = "undo",
+                message = context.getString(R.string.deleted),
+                actionLabel = context.getString(R.string.undo),
                 duration = SnackbarDuration.Short,
                 withDismissAction = true
             )
@@ -114,8 +118,10 @@ fun DeleteBackground(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
-            .background(color = color,
-                shape = RoundedCornerShape(32.dp)),
+            .background(
+                color = color,
+                shape = RoundedCornerShape(32.dp)
+            ),
         contentAlignment = Alignment.CenterEnd,
     ) {
 
