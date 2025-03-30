@@ -72,11 +72,14 @@ fun HomeScreen() {
             )
         )
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
+
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
     val language = getLanguageCode(savedLanguage).toString()
+
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
+    val cacheState by viewModel.cachedHome.collectAsStateWithLifecycle()
 
     val connectivityObserver = remember { ConnectivityObserver(context) }
     val isConnected by connectivityObserver.isConnected.collectAsStateWithLifecycle(
@@ -84,30 +87,78 @@ fun HomeScreen() {
             context
         )
     )
+
     LaunchedEffect(isConnected, language) {
         if (isConnected) {
             viewModel.getWeather(language)
+        }else{
+            viewModel.getCachedHome()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             !isConnected -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
+                when(cacheState){
+                    is Response.Failure -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
 
-                    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wind))
-                    val progress by animateLottieCompositionAsState(
-                        composition = composition, iterations = LottieConstants.IterateForever
-                    )
+                            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wind))
+                            val progress by animateLottieCompositionAsState(
+                                composition = composition, iterations = LottieConstants.IterateForever
+                            )
 
-                    LottieAnimation(
-                        composition = composition,
-                        progress = { progress },
-                        modifier = Modifier.fillMaxSize()
-                    )
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                    Response.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .wrapContentSize()
+                        ) { CircularProgressIndicator() }
+                    }
+                    is Response.Success -> {
+                        val home = (cacheState as Response.Success).data
+                        val data = getAirItems(context)
+                        Column(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 24.dp, vertical = 10.dp)
+                        ) {
+                            LocationDetails(
+                                modifier = Modifier.padding(top = 10.dp),
+                                location = home.currentWeather.name
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CurrentWeather(
+                                weatherResponse = home.currentWeather
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            AirQuality(
+                                airQuality = home.currentWeather,
+                                data = data
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            WeeklyForecast(
+                                data = home.foreCast
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HourlyWeather(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 200.dp),
+                                data = home.hours
+                            )
+                        }
+                    }
                 }
             }
 
@@ -126,6 +177,7 @@ fun HomeScreen() {
 
             uiState is Response.Success -> {
                 val (currentWeather, forecast, hourly) = (uiState as Response.Success).data
+                viewModel.insertCacheHome(currentWeather, forecast, hourly)
                 val data = getAirItems(context)
                 Column(
                     modifier = Modifier

@@ -2,6 +2,7 @@ package com.example.clima.local
 
 import com.example.clima.model.Alarm
 import com.example.clima.model.FavouritePOJO
+import com.example.clima.model.HomePOJO
 import kotlinx.coroutines.flow.Flow
 
 class WeatherLocalDataSource(private val weatherDao: WeatherDao) : IWeatherLocalDataSource {
@@ -31,5 +32,13 @@ class WeatherLocalDataSource(private val weatherDao: WeatherDao) : IWeatherLocal
 
     override suspend fun deleteAlarm(alarm: Alarm) {
         return weatherDao.deleteAlarm(alarm)
+    }
+
+    override fun getCachedHome(): Flow<HomePOJO> {
+        return weatherDao.getCachedHome()
+    }
+
+    override suspend fun insertCacheHome(home: HomePOJO) {
+        weatherDao.insertCacheHome(home)
     }
 }

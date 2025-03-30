@@ -5,6 +5,7 @@ import com.example.clima.model.Alarm
 import com.example.clima.model.CurrentWeather
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.model.ForeCast
+import com.example.clima.model.HomePOJO
 import com.example.clima.remote.IWeatherRemoteDataSource
 import com.example.clima.remote.WeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +59,14 @@ class WeatherRepo private constructor(
 
     override suspend fun getAlarm(alarmId: Int): Alarm? {
         return weatherLocalDataSource.getAlarm(alarmId)
+    }
+
+    override fun getCachedHome(): Flow<HomePOJO> {
+        return weatherLocalDataSource.getCachedHome()
+    }
+
+    override suspend fun insertCacheHome(home: HomePOJO) {
+        weatherLocalDataSource.insertCacheHome(home)
     }
 
     companion object {
