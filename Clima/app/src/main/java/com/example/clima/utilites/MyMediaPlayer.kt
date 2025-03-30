@@ -1,4 +1,4 @@
-package com.example.clima.composable.alarms.service
+package com.example.clima.utilites
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -16,7 +16,6 @@ object MyMediaPlayer {
                 start()
             }
     }
-
     fun stopAudio(){
         mediaPlayer?.let {
             it.stop()

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class FavouriteViewModel(val repository: WeatherRepo) : ViewModel() {
@@ -28,6 +29,7 @@ class FavouriteViewModel(val repository: WeatherRepo) : ViewModel() {
                     .catch {
                         _favouriteLocations.value = Response.Failure(it.message.toString())
                     }
+                    .map { it.sortedBy { it.country } }
                     .collect {
                         _favouriteLocations.value = Response.Success(it)
                     }
@@ -37,6 +39,15 @@ class FavouriteViewModel(val repository: WeatherRepo) : ViewModel() {
         }
     }
 
+    fun insertFavouriteCity(city:FavouritePOJO){
+        viewModelScope.launch {
+            try{
+                repository.insertWeather(city)
+            }catch(e:Exception){
+                mutableMessage.emit("Couldn't Insert Location To Favourites ")
+            }
+        }
+    }
     fun deleteFavouriteCity(city: FavouritePOJO) {
         viewModelScope.launch {
             try{

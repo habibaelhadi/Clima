@@ -4,6 +4,7 @@ import com.example.clima.model.Alarm
 import com.example.clima.model.CurrentWeather
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.model.ForeCast
+import com.example.clima.model.HomePOJO
 import kotlinx.coroutines.flow.Flow
 
 interface IWeatherRepo {
@@ -29,4 +30,7 @@ interface IWeatherRepo {
     suspend fun deleteAlarm(alarm: Alarm)
     fun getAlarms(): Flow<List<Alarm>>
     suspend fun getAlarm(alarmId: Int): Alarm?
+
+    fun getCachedHome() : Flow<HomePOJO>
+    suspend fun insertCacheHome(home : HomePOJO)
 }

@@ -7,10 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.clima.model.Alarm
 import com.example.clima.model.FavouritePOJO
+import com.example.clima.model.HomePOJO
 import com.example.clima.utilites.Converter
 
 @TypeConverters(Converter::class)
-@Database(entities = [FavouritePOJO::class,Alarm::class], version = 4,exportSchema = false)
+@Database(entities = [FavouritePOJO::class,Alarm::class, HomePOJO::class], version = 5,exportSchema = false)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun weatherDao(): WeatherDao

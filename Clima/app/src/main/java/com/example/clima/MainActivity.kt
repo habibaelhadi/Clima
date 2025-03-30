@@ -1,5 +1,6 @@
 package com.example.clima
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.IntentFilter
 import android.os.Build
@@ -44,13 +45,13 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastCancelReceiver
 import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastReceiver
 import com.example.clima.routes.ScreenMenuItem
 import com.example.clima.routes.SetupNavHost
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.White
 import com.example.clima.ui.theme.colorGradient1
+import com.example.clima.utilites.MyMediaPlayer
 import com.example.clima.utilites.setLocale
 import kotlinx.coroutines.delay
 import np.com.susanthapa.curved_bottom_navigation.CbnMenuItem
@@ -71,10 +72,10 @@ class MainActivity : ComponentActivity() {
         registerReceiver(AlarmBroadcastReceiver(), intentFilterReceiver,
             RECEIVER_EXPORTED)
 
-        val intentFilterCancel = IntentFilter("ACTION")
-        registerReceiver(
-            AlarmBroadcastCancelReceiver(), intentFilterCancel,
-            RECEIVER_EXPORTED)
+        MyMediaPlayer.stopAudio()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
+
 
         setContent {
             var showSplash by remember { mutableStateOf(!skipSplash) }

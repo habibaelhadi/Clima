@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.clima.model.CurrentWeather
 import com.example.clima.model.ForeCast
+import com.example.clima.model.HomePOJO
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
@@ -24,6 +25,8 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                 List<ForeCast.ForecastWeather>,List<ForeCast.ForecastWeather>>>> (Response.Loading)
     val currentWeather = _currentWeather.asStateFlow()
 
+    private val _cachedHome = MutableStateFlow<Response<HomePOJO>>(Response.Loading)
+    val cachedHome = _cachedHome.asStateFlow()
 
     fun getWeather(savedLanguage: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -65,6 +68,27 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         }
     }
 
+    fun insertCacheHome(currentWeather: CurrentWeather,
+                                 foreCast: List<ForeCast.ForecastWeather>,
+                                hours : List<ForeCast.ForecastWeather>){
+        val home = HomePOJO(
+            currentWeather = currentWeather,
+            foreCast = foreCast,
+            hours = hours
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            weatherRepo.insertCacheHome(home)
+        }
+    }
+
+    fun getCachedHome(){
+        viewModelScope.launch{
+            weatherRepo.getCachedHome()
+                .collect{
+                    _cachedHome.value = Response.Success(it)
+                }
+        }
+    }
 
     class HomeFactory(private val repo: WeatherRepo) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

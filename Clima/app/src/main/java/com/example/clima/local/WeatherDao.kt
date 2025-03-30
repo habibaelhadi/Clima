@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.clima.model.Alarm
 import com.example.clima.model.FavouritePOJO
+import com.example.clima.model.HomePOJO
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -31,4 +32,10 @@ interface WeatherDao {
 
     @Delete
     suspend fun deleteAlarm(alarm: Alarm)
+
+    @Query("SELECT * FROM home_table")
+    fun getCachedHome(): Flow<HomePOJO>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCacheHome(home : HomePOJO)
 }
