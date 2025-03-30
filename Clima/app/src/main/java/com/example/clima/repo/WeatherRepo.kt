@@ -1,6 +1,7 @@
 package com.example.clima.repo
 
 import com.example.clima.local.IWeatherLocalDataSource
+import com.example.clima.model.Alarm
 import com.example.clima.model.CurrentWeather
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.model.ForeCast
@@ -41,6 +42,22 @@ class WeatherRepo private constructor(
 
     override fun getWeather(): Flow<List<FavouritePOJO>> {
         return weatherLocalDataSource.getWeather()
+    }
+
+    override suspend fun insertAlarm(alarm: Alarm) {
+        weatherLocalDataSource.insertAlarm(alarm)
+    }
+
+    override suspend fun deleteAlarm(alarm: Alarm) {
+        weatherLocalDataSource.deleteAlarm(alarm)
+    }
+
+    override fun getAlarms(): Flow<List<Alarm>> {
+        return weatherLocalDataSource.getAlarms()
+    }
+
+    override suspend fun getAlarm(alarmId: Int): Alarm? {
+        return weatherLocalDataSource.getAlarm(alarmId)
     }
 
     companion object {

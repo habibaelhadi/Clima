@@ -1,7 +1,7 @@
 package com.example.clima.utilites
 
 import androidx.annotation.DrawableRes
-import com.example.clima.composableFunctions.home.view.detectIcon
+import com.example.clima.composable.home.view.detectIcon
 import com.example.clima.model.ForeCast
 
 data class ForecastItem(
