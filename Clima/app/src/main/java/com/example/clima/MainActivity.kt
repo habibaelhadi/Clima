@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import com.example.clima.routes.SetupNavHost
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.White
 import com.example.clima.ui.theme.colorGradient1
+import com.example.clima.utilites.ConnectivityObserver
 import com.example.clima.utilites.MyMediaPlayer
 import com.example.clima.utilites.setLocale
 import kotlinx.coroutines.delay
@@ -76,6 +78,7 @@ class MainActivity : ComponentActivity() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancelAll()
 
+        val connectivityObserver = ConnectivityObserver(applicationContext)
 
         setContent {
             var showSplash by remember { mutableStateOf(!skipSplash) }
@@ -101,7 +104,7 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    ScaffoldSample()
+                    ScaffoldSample(connectivityObserver)
                 }
             }
         }
@@ -110,10 +113,17 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ScaffoldSample() {
+    fun ScaffoldSample(connectivityObserver: ConnectivityObserver) {
         val navController = rememberNavController()
         val snackbar = remember { SnackbarHostState() }
+        val isConnected by connectivityObserver.isConnected.collectAsState()
+
         Scaffold(
+            topBar = {
+                if (!isConnected) {
+                    OfflineBanner()
+                }
+            },
             snackbarHost = {
                 SnackbarHost(snackbar)
             },
@@ -171,6 +181,23 @@ class MainActivity : ComponentActivity() {
                 fontFamily = pacificoFontFamily,
                 fontSize = 40.sp,
                 color = colorGradient1
+            )
+        }
+    }
+
+    @Composable
+    fun OfflineBanner() {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.error)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.offline_mode),
+                color = MaterialTheme.colorScheme.onError,
+                fontSize = 16.sp
             )
         }
     }
