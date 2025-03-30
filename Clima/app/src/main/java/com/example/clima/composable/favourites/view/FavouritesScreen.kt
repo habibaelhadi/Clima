@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,8 +80,13 @@ fun FavouritesScreen(
 
     val viewModel: FavouriteViewModel = viewModel(factory = favFactory)
     val uiState by viewModel.favouriteLocations.collectAsStateWithLifecycle()
-    viewModel.getFavouriteCities()
+    LaunchedEffect (Unit){
+        viewModel.getFavouriteCities()
+    }
 
+    LaunchedEffect(uiState) {
+
+    }
     when (uiState) {
         is Response.Failure -> {
             val error = (uiState as Response.Failure).error
@@ -202,12 +209,14 @@ fun FavouritesList(
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .heightIn(min = 200.dp, max = 400.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(data.size) {
-                FavouriteCard(data[it], viewModel, navigateToDetails,snackbar)
+            items(
+                items = data,
+                key = { it.country }) {
+                FavouriteCard(it, viewModel, navigateToDetails,snackbar)
             }
         }
     }
@@ -226,7 +235,7 @@ fun FavouriteCard(
             viewModel.deleteFavouriteCity(item)
         },
         onRestore = {
-            viewModel.getFavouriteCities()
+            viewModel.insertFavouriteCity(it)
         },
         snackbarHostState = snackbar
     ) {

@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastCancelReceiver
 import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastReceiver
 import com.example.clima.model.Alarm
 import com.example.clima.utilites.parseTimeToMillis
@@ -19,6 +18,7 @@ class AlarmScheduler(val context: Context) : IAlarmScheduler {
         // Schedule main alarm
         val alarmIntent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
             putExtra("ALARM_ID", alarm.id)
+            putExtra("ALARM_ACTION", "START")
         }
 
         val alarmPendingIntent = PendingIntent.getBroadcast(
@@ -29,8 +29,9 @@ class AlarmScheduler(val context: Context) : IAlarmScheduler {
         )
 
         // Schedule cancellation alarm (using negative ID to differentiate)
-        val cancelIntent = Intent(context, AlarmBroadcastCancelReceiver::class.java).apply {
+        val cancelIntent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
             putExtra("ALARM_ID", alarm.id)
+            putExtra("ALARM_ACTION", "STOP")
         }
 
         val cancelPendingIntent = PendingIntent.getBroadcast(
@@ -72,7 +73,7 @@ class AlarmScheduler(val context: Context) : IAlarmScheduler {
 
     override fun cancelAlarm(alarm: Alarm) {
         val alarmIntent = Intent(context, AlarmBroadcastReceiver::class.java)
-        val cancelIntent = Intent(context, AlarmBroadcastCancelReceiver::class.java)
+        val cancelIntent = Intent(context, AlarmBroadcastReceiver::class.java)
 
         val alarmPendingIntent = PendingIntent.getBroadcast(
             context,

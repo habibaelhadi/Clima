@@ -9,12 +9,11 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
-import com.example.clima.MainActivity
 import com.example.clima.R
-import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastCancelReceiver
-import com.example.clima.composable.alarms.service.MyMediaPlayer
+import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastReceiver
 import com.example.clima.model.ForeCast
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -129,8 +128,9 @@ fun createNotification(
         notificationManager.createNotificationChannel(channel)
     }
 
-    val deleteIntent = Intent(context, AlarmBroadcastCancelReceiver::class.java).apply {
+    val deleteIntent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
         putExtra("ALARM_ID", alarmId)
+        putExtra("ALARM_ACTION", "STOP")
         action = "DELETE"
     }
     val deletePendingIntent = PendingIntent.getBroadcast(
@@ -140,8 +140,9 @@ fun createNotification(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val cancelIntent = Intent(context, AlarmBroadcastCancelReceiver::class.java).apply {
+    val cancelIntent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
         putExtra("ALARM_ID", alarmId)
+        putExtra("ALARM_ACTION", "STOP")
     }
     val cancelPendingIntent = PendingIntent.getBroadcast(
         context,
@@ -150,18 +151,21 @@ fun createNotification(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val openIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    val openIntent = Intent(context, AlarmBroadcastReceiver::class.java).apply {
+        putExtra("ALARM_ID", alarmId)
+        putExtra("ALARM_ACTION", "OPEN")
     }
-    val openPendingIntent = PendingIntent.getActivity(
+    var newAlarmId = alarmId+10
+    Log.i("TAG", "createNotification: $newAlarmId")
+    val openPendingIntent = PendingIntent.getBroadcast(
         context,
-        alarmId,
+        newAlarmId,
         openIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val notification = NotificationCompat.Builder(context, "ALARM_CHANNEL")
-        .setContentTitle("Alarm: Favourite weather awaits!")
+        .setContentTitle("Alarm: Weather awaits!")
         .setContentText("Current weather: $weatherDescription")
         .setSmallIcon(R.drawable.shower_rain)
         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
