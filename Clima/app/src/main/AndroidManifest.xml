@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -16,7 +18,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Clima"
         tools:targetApi="31">
-        <service android:name=".composableFunctions.alarms.service.AlarmService"
+        <service android:name=".composable.alarms.service.AlarmService"/>
+        <receiver android:name=".composable.alarms.broadcastrecievers.AlarmBroadcastCancelReceiver"
+            android:enabled="true"
+            android:exported="true"/>
+        <receiver android:name=".composable.alarms.broadcastrecievers.AlarmBroadcastReceiver"
             android:enabled="true"
             android:exported="true"/>
         <meta-data

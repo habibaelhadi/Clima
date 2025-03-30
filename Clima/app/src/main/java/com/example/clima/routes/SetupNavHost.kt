@@ -8,12 +8,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.clima.composableFunctions.alarms.view.AlarmsScreen
-import com.example.clima.composableFunctions.details.view.DetailsScreen
-import com.example.clima.composableFunctions.favourites.view.FavouritesScreen
-import com.example.clima.composableFunctions.home.view.HomeScreen
-import com.example.clima.composableFunctions.map.view.MapScreen
-import com.example.clima.composableFunctions.settings.view.SettingsScreen
+import com.example.clima.composable.alarms.view.AlarmsScreen
+import com.example.clima.composable.details.view.DetailsScreen
+import com.example.clima.composable.favourites.view.FavouritesScreen
+import com.example.clima.composable.home.view.HomeScreen
+import com.example.clima.composable.map.view.MapScreen
+import com.example.clima.composable.settings.view.SettingsScreen
 import com.example.clima.model.FavouritePOJO
 import com.google.gson.Gson
 
