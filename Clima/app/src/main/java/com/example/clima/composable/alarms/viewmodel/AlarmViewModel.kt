@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.clima.model.Alarm
 import com.example.clima.repo.WeatherRepo
+import com.example.clima.utilites.parseTimeToMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +18,17 @@ class AlarmViewModel(val repo : WeatherRepo) : ViewModel()  {
 
     fun getAlarms(){
         viewModelScope.launch {
-            repo.getAlarms()
-                .collect{
-                _alarms.value = it
+            repo.getAlarms().collect { alarmList ->
+                val currentTime = System.currentTimeMillis()
+                val validAlarms = alarmList.filter { alarm ->
+                    val endTimeMillis = parseTimeToMillis(alarm.endTime)
+                    endTimeMillis > currentTime
+                }
+
+                _alarms.value = validAlarms
+
+                alarmList.filter { alarm -> parseTimeToMillis(alarm.endTime) <= currentTime }
+                    .forEach { deleteAlarm(it) }
             }
         }
     }

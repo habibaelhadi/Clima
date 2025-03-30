@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,7 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
+import com.example.clima.composable.alarms.manager.AlarmScheduler
 import com.example.clima.composable.alarms.viewmodel.AlarmViewModel
+import com.example.clima.composable.favourites.view.SwipeToDeleteContainer
 import com.example.clima.local.AppDataBase
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.model.Alarm
@@ -57,7 +60,7 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 
 @Composable
-fun AlarmsScreen() {
+fun AlarmsScreen(snackbar: SnackbarHostState) {
 
     var isSheetOpen = remember { mutableStateOf(false) }
 
@@ -71,6 +74,7 @@ fun AlarmsScreen() {
     val viewModel: AlarmViewModel = viewModel(factory = alarmFactory)
     val alarms by viewModel.alarms.collectAsStateWithLifecycle()
     viewModel.getAlarms()
+
 
     Scaffold(
         floatingActionButton = {
@@ -97,7 +101,7 @@ fun AlarmsScreen() {
             if(alarms.isEmpty()){
                 NoAlarms()
             }else{
-                AlarmsList(alarms)
+                AlarmsList(alarms,viewModel,snackbar)
             }
             if (isSheetOpen.value) {
                 AlarmsDetails(isSheetOpen,viewModel)
@@ -149,7 +153,7 @@ fun NoAlarms() {
 }
 
 @Composable
-fun AlarmsList(alarms: List<Alarm>) {
+fun AlarmsList(alarms: List<Alarm>, viewModel: AlarmViewModel, snackbar: SnackbarHostState) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -187,22 +191,32 @@ fun AlarmsList(alarms: List<Alarm>) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(alarms.size) {
-                AlarmCard(alarms[it])
+                AlarmCard(alarms[it],viewModel,snackbar)
             }
         }
     }
 }
 
 @Composable
-fun AlarmCard(alarm: Alarm) {
-    /*SwipeToDeleteContainer(
-        item = data ,
+fun AlarmCard(alarm: Alarm,
+              viewModel: AlarmViewModel,
+              snackbar: SnackbarHostState) {
+
+    val context = LocalContext.current
+    val alarmScheduler = remember { AlarmScheduler(context) }
+
+    SwipeToDeleteContainer(
+        item = alarm ,
         onDelete = { item ->
+            viewModel.deleteAlarm(item)
+            alarmScheduler.cancelAlarm(item)
         },
         onRestore = {
+            viewModel.getAlarms()
+            alarmScheduler.scheduleAlarm(alarm)
         },
-        snackbarHostState =
-    ) {*/
+        snackbarHostState = snackbar
+    ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -255,4 +269,4 @@ fun AlarmCard(alarm: Alarm) {
             }
         }
     }
-//}
+}

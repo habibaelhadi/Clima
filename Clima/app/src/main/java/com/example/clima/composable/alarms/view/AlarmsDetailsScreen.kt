@@ -15,14 +15,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -76,19 +73,13 @@ fun BottomSheetContent(context: Context, viewModel: AlarmViewModel, onDismiss: (
     val date = stringResource(R.string.start_date)
     val timeStart = stringResource(R.string.start_time)
     val timeEnd = stringResource(R.string.end_time)
-    val alarm = stringResource(R.string.alarm)
+    val notification = stringResource(R.string.notification)
 
     val alarmScheduler = remember { AlarmScheduler(context) }
 
     var startDate by remember { mutableStateOf(date) }
     var startTime by remember { mutableStateOf(timeStart) }
     var endTime by remember { mutableStateOf(timeEnd) }
-    var selectedOption by remember { mutableStateOf(alarm) }
-    val options = listOf(alarm, stringResource(R.string.notification))
-    val icons = listOf(
-        R.drawable.clock,
-        R.drawable.notification
-    )
 
     Column(
         modifier = Modifier
@@ -124,36 +115,17 @@ fun BottomSheetContent(context: Context, viewModel: AlarmViewModel, onDismiss: (
             color = Black
         )
 
-        Column(
-            Modifier
-                .selectableGroup()
-                .padding(vertical = 8.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         ) {
-            options.forEachIndexed { index, option ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = (option == selectedOption),
-                            onClick = { selectedOption = option }
-                        )
-                        .padding(vertical = 6.dp)
-                ) {
-                    RadioButton(
-                        selected = (option == selectedOption),
-                        onClick = { selectedOption = option }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Image(
-                        painter = painterResource(id = icons[index]),
-                        contentDescription = option,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(option, color = Black)
-                }
-            }
+            Image(
+                painter = painterResource(id = R.drawable.notification),
+                contentDescription = notification,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(notification, color = Black)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -189,7 +161,6 @@ fun BottomSheetContent(context: Context, viewModel: AlarmViewModel, onDismiss: (
         }
     }
 }
-
 
 @Composable
 fun DateTimePickerField(

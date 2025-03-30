@@ -44,7 +44,7 @@ fun SetupNavHost(
         }
 
         composable(RoutesScreens.Alarms.route){
-            AlarmsScreen()
+            AlarmsScreen(snackbar)
         }
 
         composable(RoutesScreens.Settings.route){
