@@ -4,7 +4,6 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.example.clima.composable.alarms.manager.AlarmScheduler
 import com.example.clima.composable.alarms.service.MyMediaPlayer
 import com.example.clima.local.AppDataBase
@@ -25,7 +24,6 @@ class AlarmBroadcastCancelReceiver : BroadcastReceiver() {
 
         val isDeleteAction = intent.action == "DELETE" || intent.getBooleanExtra("isDismiss", false)
 
-        Log.i("CANCEL RECEIVER", "onReceive: $isDeleteAction")
         CoroutineScope(Dispatchers.IO).launch {
             val repository = WeatherRepo.getInstance(
                 WeatherRemoteDataSource(RetrofitProduct.retrofit),
@@ -43,7 +41,6 @@ class AlarmBroadcastCancelReceiver : BroadcastReceiver() {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(alarmId)
 
-                Log.d("AlarmCancelReceiver", "Alarm ${it.id} cancelled")
             }
         }
 

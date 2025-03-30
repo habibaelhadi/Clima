@@ -11,6 +11,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
+import com.example.clima.MainActivity
 import com.example.clima.R
 import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastCancelReceiver
 import com.example.clima.composable.alarms.service.MyMediaPlayer
@@ -109,21 +110,6 @@ fun formatTemperatureUnitBasedOnLanguage(unit: String): String {
     return unit
 }
 
-fun calculateDelay(targetHour: Int, targetMinute: Int): Long {
-    val now = Calendar.getInstance()
-    val targetTime = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, targetHour)
-        set(Calendar.MINUTE, targetMinute)
-        set(Calendar.SECOND, 0)
-    }
-
-    if (targetTime.before(now)) {
-        targetTime.add(Calendar.DAY_OF_MONTH, 1) // Schedule for next day
-    }
-
-    return targetTime.timeInMillis - now.timeInMillis
-}
-
 fun createNotification(
     context: Context,
     alarmId: Int,
@@ -154,7 +140,6 @@ fun createNotification(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-
     val cancelIntent = Intent(context, AlarmBroadcastCancelReceiver::class.java).apply {
         putExtra("ALARM_ID", alarmId)
     }
@@ -162,6 +147,16 @@ fun createNotification(
         context,
         alarmId,
         cancelIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val openIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    val openPendingIntent = PendingIntent.getActivity(
+        context,
+        alarmId,
+        openIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
@@ -177,6 +172,11 @@ fun createNotification(
             R.drawable.broken_clouds,
             "Cancel",
             cancelPendingIntent
+        )
+        .addAction(
+            R.drawable.broken_clouds,
+            "Open",
+            openPendingIntent
         )
         .setDeleteIntent(deletePendingIntent)
         .build()
