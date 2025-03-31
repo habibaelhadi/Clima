@@ -17,6 +17,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,8 @@ import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
 import com.example.clima.utilites.getAirItems
 import com.example.clima.utilites.getLanguageCode
+import com.example.clima.utilites.getTempUnit
+import com.example.clima.utilites.getWindSpeedUnitSymbol
 
 @Composable
 fun DetailsScreen(
@@ -53,10 +57,23 @@ fun DetailsScreen(
     val viewModel: DetailsViewModel = viewModel(factory = detailsFactory)
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+    val savedLanguage  by remember {
+        mutableStateOf(sharedPreferences.getString("app_language",
+            "English") ?: "English")
+    }
+    val savedTemp  by remember {
+        mutableStateOf( sharedPreferences.getString("app_temp",
+            "Celsius (°C)")?:"Celsius (°C)") }
+    val savedWind  by remember {
+        mutableStateOf(sharedPreferences.getString("app_wind",
+            "Miles per hour (m/h)")?:"Miles per hour (m/h)") }
+
+    val windUnit = context.getWindSpeedUnitSymbol(savedWind)
     val language = getLanguageCode(savedLanguage).toString()
+    val temp = getTempUnit(savedTemp)
+
     LaunchedEffect (location){
-        viewModel.getWeather(location.latitude, location.longitude,language)
+        viewModel.getWeather(location.latitude, location.longitude,language,temp)
     }
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
     val data = getAirItems(context)
@@ -84,26 +101,30 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = location.currentWeather
+                        weatherResponse = location.currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = location.currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
                         data = location.forecast.dailyForecasts()
                             .flatMap {
                                 it.value.take(1)
-                            }
+                            },
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = location.forecast.list.subList(0,8)
+                        data = location.forecast.list.subList(0,8),
+                        tempUnit = temp
                     )
                 }
             }
@@ -121,23 +142,27 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = currentWeather
+                        weatherResponse = currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
-                        data = forecast
+                        data = forecast,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = hourly
+                        data = hourly,
+                        tempUnit = temp
                     )
                 }
             }

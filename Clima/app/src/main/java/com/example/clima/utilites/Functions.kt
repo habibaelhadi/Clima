@@ -86,6 +86,24 @@ fun getLanguageCode(language: String) : Locale{
     }
 }
 
+fun getUnitCode(temp : String) : String{
+    return when (temp) {
+        "Celsius (°C)" -> "metric"
+        "Kelvin (°K)" -> "standard"
+        "Fahrenheit (°F)" -> "imperial"
+        else -> "metric"
+    }
+}
+
+fun getTempUnit(temp : String):String{
+    return when (temp) {
+        "Celsius (°C)" -> "°C"
+        "Kelvin (°K)" -> "°K"
+        "Fahrenheit (°F)" -> "°F"
+        else -> "°C"
+    }
+}
+
 fun convertToArabicNumbers(number: String): String {
     val arabicDigits = arrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
     return number.map { if (it.isDigit()) arabicDigits[it.digitToInt()] else it }.joinToString("")
@@ -107,6 +125,15 @@ fun formatTemperatureUnitBasedOnLanguage(unit: String): String {
         }
     }
     return unit
+}
+
+fun Context.getWindSpeedUnitSymbol(unit: String): String {
+    return when (unit) {
+        "Meters per second (m/s)" -> getString(R.string.meter_sec)
+        "Meters per second (m/s)" -> getString(R.string.meter_sec)
+        "Miles per hour (m/h)" -> getString(R.string.mile_hour)
+        else -> getString(R.string.meter_sec)
+    }
 }
 
 fun createNotification(

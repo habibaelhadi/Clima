@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,9 @@ import com.example.clima.utilites.Response
 import com.example.clima.utilites.checkForInternet
 import com.example.clima.utilites.getAirItems
 import com.example.clima.utilites.getLanguageCode
+import com.example.clima.utilites.getTempUnit
+import com.example.clima.utilites.getUnitCode
+import com.example.clima.utilites.getWindSpeedUnitSymbol
 
 
 @Composable
@@ -75,8 +79,21 @@ fun HomeScreen() {
 
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+    val savedLanguage  by remember {
+        mutableStateOf(sharedPreferences.getString("app_language",
+            "English") ?: "English")
+    }
+    val savedTemp  by remember {
+        mutableStateOf( sharedPreferences.getString("app_temp",
+        "Celsius (°C)")?:"Celsius (°C)") }
+    val savedWind  by remember {
+        mutableStateOf(sharedPreferences.getString("app_wind",
+            "Miles per hour (m/h)")?:"Miles per hour (m/h)") }
+
+    val windUnit = context.getWindSpeedUnitSymbol(savedWind)
     val language = getLanguageCode(savedLanguage).toString()
+    val unit = getUnitCode(savedTemp)
+    val temp = getTempUnit(savedTemp)
 
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
     val cacheState by viewModel.cachedHome.collectAsStateWithLifecycle()
@@ -90,7 +107,7 @@ fun HomeScreen() {
 
     LaunchedEffect(isConnected, language) {
         if (isConnected) {
-            viewModel.getWeather(language)
+            viewModel.getWeather(language,unit)
         }else{
             viewModel.getCachedHome()
         }
@@ -139,23 +156,27 @@ fun HomeScreen() {
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             CurrentWeather(
-                                weatherResponse = home.currentWeather
+                                weatherResponse = home.currentWeather,
+                                tempUnit = temp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             AirQuality(
                                 airQuality = home.currentWeather,
-                                data = data
+                                data = data,
+                                windUnit = windUnit
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             WeeklyForecast(
-                                data = home.foreCast
+                                data = home.foreCast,
+                                tempUnit = temp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             HourlyWeather(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 200.dp),
-                                data = home.hours
+                                data = home.hours,
+                                tempUnit = temp
                             )
                         }
                     }
@@ -190,23 +211,27 @@ fun HomeScreen() {
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = currentWeather
+                        weatherResponse = currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
-                        data = forecast
+                        data = forecast,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = hourly
+                        data = hourly,
+                        tempUnit = temp
                     )
                 }
             }

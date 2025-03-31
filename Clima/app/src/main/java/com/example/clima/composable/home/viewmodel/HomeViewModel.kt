@@ -28,19 +28,19 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
     private val _cachedHome = MutableStateFlow<Response<HomePOJO>>(Response.Loading)
     val cachedHome = _cachedHome.asStateFlow()
 
-    fun getWeather(savedLanguage: String) {
+    fun getWeather(savedLanguage: String, temp: String) {
         viewModelScope.launch(Dispatchers.IO) {
 
             try {
                 val current = async {
-                    weatherRepo.getCurrentWeather(31.252321, 29.992283, "metric", savedLanguage)
+                    weatherRepo.getCurrentWeather(31.252321, 29.992283, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .first()
                 }
                 val forecast = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, "metric", savedLanguage)
+                    weatherRepo.getForecast(31.252321, 29.992283, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -51,7 +51,7 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         .firstOrNull() ?: emptyList()
                 }
                 val hourly = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, "metric", savedLanguage)
+                    weatherRepo.getForecast(31.252321, 29.992283, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }

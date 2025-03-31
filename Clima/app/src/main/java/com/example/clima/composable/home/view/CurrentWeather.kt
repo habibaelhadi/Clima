@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,11 +42,13 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.displayDate
 import com.example.clima.utilites.formatNumberBasedOnLanguage
+import com.example.clima.utilites.formatTemperatureUnitBasedOnLanguage
 
 @Composable
 fun CurrentWeather(
     modifier: Modifier = Modifier,
-    weatherResponse : CurrentWeather
+    weatherResponse : CurrentWeather,
+    tempUnit : String
 ) {
     val tempActual = weatherResponse.main.temp.toInt().toString()
     val temp = formatNumberBasedOnLanguage(tempActual)
@@ -112,7 +116,8 @@ fun CurrentWeather(
             bottom.linkTo(anchor = foreCastImage.bottom)
         },
             degree = temp,
-            description = feelsLike)
+            description = feelsLike,
+            tempUnit)
     }
 
 
@@ -147,32 +152,46 @@ private fun CardBackground(
 @Composable
 private fun ForeCastValue(
     modifier: Modifier = Modifier,
-    degree: String ,
-    description: String
+    degree: String,
+    description: String,
+    tempUnit: String
 ) {
+    val isLargeTemp = degree.length > 2  // Check if degree has more than 2 digits
+    val fontSize = if (isLargeTemp) 50.sp else 80.sp // Adjust font size
+
     Column(
         modifier = modifier, horizontalAlignment = Alignment.Start
     ) {
-        Box(
-            contentAlignment = Alignment.TopEnd
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp)
         ) {
             Text(
-                text = degree, fontFamily = FontFamily(Font(R.font.exo2)), style = TextStyle(
-                    brush = Brush.linearGradient(
-                        0f to White, 1f to White.copy(alpha = 0.3f)
-                    ), fontSize = 80.sp, fontWeight = FontWeight.Black
-                ), modifier = Modifier.padding(16.dp)
-            )
-            Text(
-                text = stringResource(R.string.degree),
+                text = degree,
                 fontFamily = FontFamily(Font(R.font.exo2)),
                 style = TextStyle(
                     brush = Brush.linearGradient(
                         0f to White, 1f to White.copy(alpha = 0.3f)
-                    ), fontSize = 70.sp, fontWeight = FontWeight.Light
-                )
+                    ),
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.Black
+                ),
+                maxLines = 1
+            )
+            Text(
+                text = formatTemperatureUnitBasedOnLanguage(tempUnit),
+                fontFamily = FontFamily(Font(R.font.exo2)),
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        0f to White, 1f to White.copy(alpha = 0.3f)
+                    ),
+                    fontSize = fontSize * 0.5f,
+                    fontWeight = FontWeight.Light
+                ),
+                modifier = Modifier.padding(start = 4.dp)
             )
         }
+        Spacer(modifier = Modifier.padding(16.dp))
         Text(
             text = stringResource(R.string.feels_like, description),
             fontFamily = FontFamily(Font(R.font.exo2)),

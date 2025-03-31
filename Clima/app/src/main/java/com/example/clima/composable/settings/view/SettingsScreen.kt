@@ -2,6 +2,8 @@ package com.example.clima.composable.settings.view
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,19 +56,20 @@ fun SettingsScreen() {
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
-    ){
+    ) {
         val context = LocalContext.current
-        LanguageSettingsScreen(context)
-        UnitsSettingsScreen()
-        LocationSettingsScreen()
+        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        LanguageSettingsScreen(context, sharedPreferences)
+        UnitsSettingsScreen(context, sharedPreferences)
+        LocationSettingsScreen(context, sharedPreferences)
     }
 }
 
 @Composable
-fun LanguageSettingsScreen(context: Context) {
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
+fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
+    val language = sharedPreferences.getString("app_language", "English") ?: "English"
 
+    val savedLanguage = remember { mutableStateOf(language) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -103,11 +107,11 @@ fun LanguageSettingsScreen(context: Context) {
     }
 }
 
-
-
-
 @Composable
-fun LocationSettingsScreen() {
+fun LocationSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
+    val location = sharedPreferences.getString("app_location", "GPS") ?: "GPS"
+
+    val savedLocation = remember { mutableStateOf(location) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -126,19 +130,32 @@ fun LocationSettingsScreen() {
 
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
-        SettingRow(stringResource(R.string.selected_location), listOf(
-            stringResource(R.string.gps),
-            stringResource(R.string.map)),
-            stringResource(R.string.gps))
+        SettingRow(
+            stringResource(R.string.selected_location), listOf(
+                stringResource(R.string.gps),
+                stringResource(R.string.map)
+            ),
+            defaultValue = savedLocation
+        ) { newLocation ->
+            sharedPreferences.edit().putString("app_location", newLocation).apply()
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
     }
 }
 
-
 @Composable
-fun UnitsSettingsScreen() {
+fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
+
+    var temp = sharedPreferences.getString("app_temp",
+        "Celsius (°C)") ?: "Celsius (°C)"
+    var wind =  sharedPreferences.getString("app_wind",
+        "Miles per hour (m/h)") ?: "Miles per hour (m/h)"
+
+    val savedTemp = remember { mutableStateOf(temp) }
+    val savedWind = remember { mutableStateOf(wind) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,20 +174,60 @@ fun UnitsSettingsScreen() {
 
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
 
-        SettingRow(stringResource(R.string.temperature),
-            listOf(stringResource(R.string.celsius_c),
+        // Temperature Setting
+        SettingRow(
+            stringResource(R.string.temperature),
+            listOf(
+                stringResource(R.string.celsius_c),
                 stringResource(R.string.fahrenheit_f),
                 stringResource(R.string.kelvin_k)
             ),
-            defaultValue = stringResource(R.string.celsius_c))
-        SettingRow(stringResource(R.string.wind),
-            listOf(stringResource(R.string.kilometers_per_hour_km_h),
-                stringResource(R.string.miles_per_second_m_s)
+            defaultValue = savedTemp
+        ) { newTemp ->
+            savedTemp.value = newTemp
+            sharedPreferences.edit().putString("app_temp", newTemp).apply()
+
+            // Automatically update wind speed unit based on temperature unit
+            val updatedWind = when (newTemp) {
+                "Fahrenheit (°F)" -> "Miles per hour (m/h)"
+                else -> "Meters per second (m/s)"
+            }
+
+            if (updatedWind != savedWind.value) {
+                Log.i("TAG", "Temp: $savedWind")
+                savedWind.value = updatedWind
+                sharedPreferences.edit().putString("app_wind", updatedWind).apply()
+            }
+        }
+
+        // Wind Speed Setting
+        SettingRow(
+            stringResource(R.string.wind),
+            listOf(
+                stringResource(R.string.miles_per_hour_m_h),
+                stringResource(R.string.meters_per_second_m_s)
             ),
-            defaultValue = stringResource(R.string.kilometers_per_hour_km_h))
+            defaultValue = savedWind
+        ) { newWind ->
+            Log.i("TAG", "newWind: $newWind")
+            savedWind.value = newWind
+            sharedPreferences.edit().putString("app_wind", newWind).apply()
+
+            val updateTemp = when(newWind){
+                "Miles per hour (m/h)" -> "Fahrenheit (°F)"
+                else -> "Celsius (°C)"
+
+            }
+
+            if(updateTemp != savedTemp.value){
+                savedTemp.value = updateTemp
+                sharedPreferences.edit().putString("app_temp", updateTemp).apply()
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
         Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+
     }
 }
 
@@ -178,10 +235,10 @@ fun UnitsSettingsScreen() {
 fun SettingRow(
     label: String,
     options: List<String>,
-    defaultValue: String,
+    defaultValue: MutableState<String>,
     onValueChange: (String) -> Unit = {}
 ) {
-    var selectedValue by remember { mutableStateOf(defaultValue) }
+
     var expanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -190,13 +247,13 @@ fun SettingRow(
     val settingKey = when (label) {
         stringResource(R.string.selected_language) -> "app_language"
         stringResource(R.string.selected_location) -> "app_location"
-        stringResource(R.string.temperature) -> "app_temperature"
+        stringResource(R.string.temperature) -> "app_temp"
         stringResource(R.string.wind) -> "app_wind"
         else -> label // Fallback to using label, but it's not recommended
     }
 
     LaunchedEffect(Unit) {
-        selectedValue = sharedPreferences.getString(settingKey, defaultValue) ?: defaultValue
+        defaultValue.value = sharedPreferences.getString(settingKey, defaultValue.value) ?: defaultValue.value
     }
 
 
@@ -219,7 +276,7 @@ fun SettingRow(
         Box {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = selectedValue,
+                    text = defaultValue.value,
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.exo2)),
                     color = Gray
@@ -241,13 +298,13 @@ fun SettingRow(
                     DropdownMenuItem(
                         text = { Text(option, fontFamily = FontFamily(Font(R.font.exo2))) },
                         onClick = {
-                            selectedValue = option
+                            defaultValue.value = option
                             expanded = false
                             sharedPreferences.edit().putString(label, option).apply()
                             onValueChange(option)
                         },
                         leadingIcon = {
-                            if (selectedValue == option) {
+                            if (defaultValue.value == option) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Selected",
