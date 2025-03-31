@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -91,13 +92,34 @@ fun getUnitCode(temp : String) : String{
         "Celsius (°C)" -> "metric"
         "Kelvin (°K)" -> "standard"
         "Fahrenheit (°F)" -> "imperial"
+        "درجة مئوية (°س)" -> "metric"
+        "كلفن (°ك)" -> "standard"
+        "فهرنهايت (°ف)" -> "imperial"
+        "Santigrat (°C)" -> "metric"
+        "Kelvin (°K)" -> "standard"
+        "Fahrenheit (°F)" -> "imperial"
         else -> "metric"
+    }
+}
+
+fun Context.getTempUnitSymbol(unit: String): String {
+    return when (unit) {
+        "standard" -> getString(R.string.kelvin_k)
+        "metric" -> getString(R.string.celsius_c)
+        "imperial" -> getString(R.string.fahrenheit_f)
+        else -> getString(R.string.celsius_c)
     }
 }
 
 fun getTempUnit(temp : String):String{
     return when (temp) {
         "Celsius (°C)" -> "°C"
+        "Kelvin (°K)" -> "°K"
+        "Fahrenheit (°F)" -> "°F"
+        "درجة مئوية (°س)" -> "°س"
+        "كلفن (°ك)" -> "°ك"
+        "فهرنهايت (°ف)" -> "°ف"
+        "Santigrat (°C)" -> "°C"
         "Kelvin (°K)" -> "°K"
         "Fahrenheit (°F)" -> "°F"
         else -> "°C"
@@ -127,6 +149,7 @@ fun formatTemperatureUnitBasedOnLanguage(unit: String): String {
     return unit
 }
 
+
 fun Context.getWindSpeedUnitSymbol(unit: String): String {
     return when (unit) {
         "Meters per second (m/s)" -> getString(R.string.meter_sec)
@@ -134,6 +157,83 @@ fun Context.getWindSpeedUnitSymbol(unit: String): String {
         "Miles per hour (m/h)" -> getString(R.string.mile_hour)
         else -> getString(R.string.meter_sec)
     }
+}
+
+fun updateUnitsBasedOnLanguage(context: Context, sharedPreferences: SharedPreferences, language: String) {
+    val newTempUnits: List<String>
+    val newWindUnits: List<String>
+
+    when (language) {
+        "English" -> {
+            newTempUnits = listOf(
+                context.getString(R.string.celsius_c),   // Celsius (°C)
+                context.getString(R.string.fahrenheit_f), // Fahrenheit (°F)
+                context.getString(R.string.kelvin_k)      // Kelvin (°K)
+            )
+            newWindUnits = listOf(
+                context.getString(R.string.miles_per_hour_m_h), // Miles per hour (m/h)
+                context.getString(R.string.meters_per_second_m_s) // Meters per second (m/s)
+            )
+        }
+
+        "العربية" -> {
+            newTempUnits = listOf(
+                context.getString(R.string.celsius_c),   // درجة مئوية (°س)
+                context.getString(R.string.fahrenheit_f), // فهرنهايت (°ف)
+                context.getString(R.string.kelvin_k)      // كلفن (°ك)
+            )
+            newWindUnits = listOf(
+                context.getString(R.string.miles_per_hour_m_h), // أميال في الساعة (م/س)
+                context.getString(R.string.meters_per_second_m_s) // أمتار في الثانية (م/ث)
+            )
+        }
+
+        "Türkiye" -> {
+            newTempUnits = listOf(
+                context.getString(R.string.celsius_c),   // Santigrat (°C)
+                context.getString(R.string.fahrenheit_f), // Fahrenheit (°F)
+                context.getString(R.string.kelvin_k)      // Kelvin (°K)
+            )
+            newWindUnits = listOf(
+                context.getString(R.string.miles_per_hour_m_h), // Mil/saat (m/h)
+                context.getString(R.string.meters_per_second_m_s) // Metre/saniye (m/s)
+            )
+        }
+
+        else -> {
+            // Default to English if language is not recognized
+            newTempUnits = listOf(
+                context.getString(R.string.celsius_c),
+                context.getString(R.string.fahrenheit_f),
+                context.getString(R.string.kelvin_k)
+            )
+            newWindUnits = listOf(
+                context.getString(R.string.miles_per_hour_m_h),
+                context.getString(R.string.meters_per_second_m_s)
+            )
+        }
+    }
+
+    val currentTemp = sharedPreferences.getString("app_temp", newTempUnits[0])
+    val currentWind = sharedPreferences.getString("app_wind", newWindUnits[0])
+
+    // If the saved unit exists in the previous language set, replace it with the new one
+    val updatedTempUnit = when (currentTemp) {
+        context.getString(R.string.celsius_c) -> newTempUnits[0]
+        context.getString(R.string.fahrenheit_f) -> newTempUnits[1]
+        context.getString(R.string.kelvin_k) -> newTempUnits[2]
+        else -> newTempUnits[0] // Default to Celsius
+    }
+
+    val updatedWindUnit = when (currentWind) {
+        context.getString(R.string.miles_per_hour_m_h) -> newWindUnits[0]
+        context.getString(R.string.meters_per_second_m_s) -> newWindUnits[1]
+        else -> newWindUnits[0] // Default to Miles per hour
+    }
+
+    // Save the updated localized units
+    sharedPreferences.edit().putString("app_temp", updatedTempUnit).apply()
+    sharedPreferences.edit().putString("app_wind", updatedWindUnit).apply()
 }
 
 fun createNotification(

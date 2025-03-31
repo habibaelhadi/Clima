@@ -46,7 +46,6 @@ import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.ForecastItem
 import com.example.clima.utilites.convertAPIResponse
 import com.example.clima.utilites.formatNumberBasedOnLanguage
-import com.example.clima.utilites.formatTemperatureUnitBasedOnLanguage
 import com.example.clima.utilites.fromHex
 
 @Composable
@@ -71,7 +70,7 @@ fun WeeklyForecast(
                 ForecastCard(item = item.convertAPIResponse(
                     forecast = item,
                     true),
-                    tempUnit = formatTemperatureUnitBasedOnLanguage(tempUnit)
+                    tempUnit = tempUnit
                 )
             }
         }

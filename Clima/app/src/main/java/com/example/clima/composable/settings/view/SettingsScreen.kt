@@ -3,7 +3,6 @@ package com.example.clima.composable.settings.view
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +47,7 @@ import com.example.clima.R
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.utilites.setLocale
+import com.example.clima.utilites.updateUnitsBasedOnLanguage
 
 @Composable
 fun SettingsScreen() {
@@ -96,6 +96,8 @@ fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreference
             sharedPreferences.edit().putString("app_language", newLanguage).apply()
             setLocale(context, newLanguage)
 
+            updateUnitsBasedOnLanguage(context,sharedPreferences,newLanguage)
+
             // Restart activity to apply language change
             val intent = Intent(context, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -109,7 +111,8 @@ fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreference
 
 @Composable
 fun LocationSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
-    val location = sharedPreferences.getString("app_location", "GPS") ?: "GPS"
+    val gps = stringResource(R.string.gps)
+    val location = sharedPreferences.getString("app_location", gps) ?: gps
 
     val savedLocation = remember { mutableStateOf(location) }
     Column(
@@ -148,10 +151,15 @@ fun LocationSettingsScreen(context: Context, sharedPreferences: SharedPreference
 @Composable
 fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
 
+    val celsius = stringResource(R.string.celsius_c)
+    val fahrenheit = stringResource(R.string.fahrenheit_f)
+    val miles = stringResource(R.string.miles_per_hour_m_h)
+    val meters = stringResource(R.string.meters_per_second_m_s)
+
     var temp = sharedPreferences.getString("app_temp",
-        "Celsius (°C)") ?: "Celsius (°C)"
+        celsius) ?: celsius
     var wind =  sharedPreferences.getString("app_wind",
-        "Miles per hour (m/h)") ?: "Miles per hour (m/h)"
+        miles) ?: miles
 
     val savedTemp = remember { mutableStateOf(temp) }
     val savedWind = remember { mutableStateOf(wind) }
@@ -189,12 +197,11 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
 
             // Automatically update wind speed unit based on temperature unit
             val updatedWind = when (newTemp) {
-                "Fahrenheit (°F)" -> "Miles per hour (m/h)"
-                else -> "Meters per second (m/s)"
+                fahrenheit -> miles
+                else -> meters
             }
 
             if (updatedWind != savedWind.value) {
-                Log.i("TAG", "Temp: $savedWind")
                 savedWind.value = updatedWind
                 sharedPreferences.edit().putString("app_wind", updatedWind).apply()
             }
@@ -209,13 +216,12 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
             ),
             defaultValue = savedWind
         ) { newWind ->
-            Log.i("TAG", "newWind: $newWind")
             savedWind.value = newWind
             sharedPreferences.edit().putString("app_wind", newWind).apply()
 
             val updateTemp = when(newWind){
-                "Miles per hour (m/h)" -> "Fahrenheit (°F)"
-                else -> "Celsius (°C)"
+                miles -> fahrenheit
+                else -> celsius
 
             }
 

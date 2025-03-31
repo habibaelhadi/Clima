@@ -42,7 +42,6 @@ import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
 import com.example.clima.utilites.displayDate
 import com.example.clima.utilites.formatNumberBasedOnLanguage
-import com.example.clima.utilites.formatTemperatureUnitBasedOnLanguage
 
 @Composable
 fun CurrentWeather(
@@ -179,7 +178,7 @@ private fun ForeCastValue(
                 maxLines = 1
             )
             Text(
-                text = formatTemperatureUnitBasedOnLanguage(tempUnit),
+                text = tempUnit,
                 fontFamily = FontFamily(Font(R.font.exo2)),
                 style = TextStyle(
                     brush = Brush.linearGradient(

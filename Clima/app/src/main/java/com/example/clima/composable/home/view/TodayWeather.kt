@@ -28,7 +28,6 @@ import com.example.clima.ui.theme.Black
 import com.example.clima.utilites.ForecastItem
 import com.example.clima.utilites.convertAPIResponse
 import com.example.clima.utilites.formatNumberBasedOnLanguage
-import com.example.clima.utilites.formatTemperatureUnitBasedOnLanguage
 
 @Composable
 fun HourlyWeather(
@@ -51,7 +50,7 @@ fun HourlyWeather(
             items(data) { hour ->
                 HourlyCard(data = hour.convertAPIResponse(
                     forecast = hour),
-                    tempUnit = formatTemperatureUnitBasedOnLanguage(tempUnit)
+                    tempUnit = tempUnit
                 )
             }
         }
