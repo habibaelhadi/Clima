@@ -9,6 +9,7 @@ import com.example.clima.model.HomePOJO
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import com.example.clima.utilites.getLanguageCode
 import com.example.clima.utilites.getUnitCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -52,7 +53,7 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
             val lat = weatherRepo.getMapCoordinates().first.toDouble()
             val lng = weatherRepo.getMapCoordinates().second.toDouble()
             val temp = getUnitCode(weatherRepo.getTemperatureUnit())
-            val savedLanguage = weatherRepo.getLanguage()
+            val savedLanguage = getLanguageCode(weatherRepo.getLanguage()).toString()
 
             try {
                 val current = async {

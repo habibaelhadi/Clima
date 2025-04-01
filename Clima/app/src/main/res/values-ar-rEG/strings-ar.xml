@@ -46,4 +46,9 @@
     <string name="mile_hour"> ميل/س</string>
     <string name="percent"> ٪</string>
     <string name="hpa"> هكتوباسكال</string>
+    <string name="save_as_location">احفظ كموقع</string>
+    <string name="alarm_weather_awaits">تنبيه: الطقس في الانتظار!</string>
+    <string name="current_weather">الطقس الحالي: %1$s</string>
+    <string name="open">افتح</string>
+    <string name="weather_data_not_available">البيانات الجوية غير متوفرة</string>
 </resources>

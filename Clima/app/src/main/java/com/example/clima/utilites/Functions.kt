@@ -5,17 +5,16 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationCompat
 import com.example.clima.R
 import com.example.clima.composable.alarms.broadcastrecievers.AlarmBroadcastReceiver
 import com.example.clima.model.ForeCast
+import com.example.clima.repo.WeatherRepo
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -78,7 +77,7 @@ fun setLocale(context: Context, language: String) {
         .apply()
 }
 
-fun getLanguageCode(language: String) : Locale{
+fun getLanguageCode(language: String): Locale {
     return when (language) {
         "English" -> Locale("en")
         "العربية" -> Locale("ar")
@@ -87,7 +86,7 @@ fun getLanguageCode(language: String) : Locale{
     }
 }
 
-fun getUnitCode(temp : String) : String{
+fun getUnitCode(temp: String): String {
     return when (temp) {
         "Celsius (°C)" -> "metric"
         "Kelvin (°K)" -> "standard"
@@ -102,16 +101,8 @@ fun getUnitCode(temp : String) : String{
     }
 }
 
-fun Context.getTempUnitSymbol(unit: String): String {
-    return when (unit) {
-        "standard" -> getString(R.string.kelvin_k)
-        "metric" -> getString(R.string.celsius_c)
-        "imperial" -> getString(R.string.fahrenheit_f)
-        else -> getString(R.string.celsius_c)
-    }
-}
 
-fun getTempUnit(temp : String):String{
+fun getTempUnit(temp: String): String {
     return when (temp) {
         "Celsius (°C)" -> "°C"
         "Kelvin (°K)" -> "°K"
@@ -136,20 +127,6 @@ fun formatNumberBasedOnLanguage(number: String): String {
     return if (language == "ar") convertToArabicNumbers(number) else number
 }
 
-fun formatTemperatureUnitBasedOnLanguage(unit: String): String {
-    val language = Locale.getDefault().language
-    if (language == "ar") {
-        return when (unit) {
-            "°C" -> "°س"
-            "°F" -> "°ف"
-            "°K" -> "°ك"
-            else -> "°س"
-        }
-    }
-    return unit
-}
-
-
 fun Context.getWindSpeedUnitSymbol(unit: String): String {
     return when (unit) {
         "Meters per second (m/s)" -> getString(R.string.meter_sec)
@@ -159,49 +136,49 @@ fun Context.getWindSpeedUnitSymbol(unit: String): String {
     }
 }
 
-fun updateUnitsBasedOnLanguage(context: Context, sharedPreferences: SharedPreferences, language: String) {
+fun updateUnitsBasedOnLanguage(context: Context, repo: WeatherRepo, language: String) {
     val newTempUnits: List<String>
     val newWindUnits: List<String>
 
     when (language) {
         "English" -> {
             newTempUnits = listOf(
-                context.getString(R.string.celsius_c),   // Celsius (°C)
-                context.getString(R.string.fahrenheit_f), // Fahrenheit (°F)
-                context.getString(R.string.kelvin_k)      // Kelvin (°K)
+                context.getString(R.string.celsius_c),
+                context.getString(R.string.fahrenheit_f),
+                context.getString(R.string.kelvin_k)
             )
             newWindUnits = listOf(
-                context.getString(R.string.miles_per_hour_m_h), // Miles per hour (m/h)
-                context.getString(R.string.meters_per_second_m_s) // Meters per second (m/s)
+                context.getString(R.string.miles_per_hour_m_h),
+                context.getString(R.string.meters_per_second_m_s)
             )
         }
 
         "العربية" -> {
             newTempUnits = listOf(
-                context.getString(R.string.celsius_c),   // درجة مئوية (°س)
-                context.getString(R.string.fahrenheit_f), // فهرنهايت (°ف)
-                context.getString(R.string.kelvin_k)      // كلفن (°ك)
+                context.getString(R.string.celsius_c),
+                context.getString(R.string.fahrenheit_f),
+                context.getString(R.string.kelvin_k)
             )
             newWindUnits = listOf(
-                context.getString(R.string.miles_per_hour_m_h), // أميال في الساعة (م/س)
-                context.getString(R.string.meters_per_second_m_s) // أمتار في الثانية (م/ث)
+                context.getString(R.string.miles_per_hour_m_h),
+                context.getString(R.string.meters_per_second_m_s)
             )
         }
 
         "Türkiye" -> {
             newTempUnits = listOf(
-                context.getString(R.string.celsius_c),   // Santigrat (°C)
-                context.getString(R.string.fahrenheit_f), // Fahrenheit (°F)
-                context.getString(R.string.kelvin_k)      // Kelvin (°K)
+                context.getString(R.string.celsius_c),
+                context.getString(R.string.fahrenheit_f),
+                context.getString(R.string.kelvin_k)
             )
             newWindUnits = listOf(
-                context.getString(R.string.miles_per_hour_m_h), // Mil/saat (m/h)
-                context.getString(R.string.meters_per_second_m_s) // Metre/saniye (m/s)
+                context.getString(R.string.miles_per_hour_m_h),
+                context.getString(R.string.meters_per_second_m_s)
             )
         }
 
         else -> {
-            // Default to English if language is not recognized
+
             newTempUnits = listOf(
                 context.getString(R.string.celsius_c),
                 context.getString(R.string.fahrenheit_f),
@@ -214,26 +191,69 @@ fun updateUnitsBasedOnLanguage(context: Context, sharedPreferences: SharedPrefer
         }
     }
 
-    val currentTemp = sharedPreferences.getString("app_temp", newTempUnits[0])
-    val currentWind = sharedPreferences.getString("app_wind", newWindUnits[0])
+    val currentTemp = repo.getTemperatureUnit()
+    val currentWind = repo.getWindSpeedUnit()
 
-    // If the saved unit exists in the previous language set, replace it with the new one
     val updatedTempUnit = when (currentTemp) {
         context.getString(R.string.celsius_c) -> newTempUnits[0]
         context.getString(R.string.fahrenheit_f) -> newTempUnits[1]
         context.getString(R.string.kelvin_k) -> newTempUnits[2]
-        else -> newTempUnits[0] // Default to Celsius
+        else -> newTempUnits[0]
     }
 
     val updatedWindUnit = when (currentWind) {
         context.getString(R.string.miles_per_hour_m_h) -> newWindUnits[0]
         context.getString(R.string.meters_per_second_m_s) -> newWindUnits[1]
-        else -> newWindUnits[0] // Default to Miles per hour
+        else -> newWindUnits[0]
     }
 
-    // Save the updated localized units
-    sharedPreferences.edit().putString("app_temp", updatedTempUnit).apply()
-    sharedPreferences.edit().putString("app_wind", updatedWindUnit).apply()
+    repo.setTemperatureUnit(updatedTempUnit)
+    repo.setWindSpeedUnit(updatedWindUnit)
+}
+
+fun updateLocationBasedOnLanguage(context: Context, repo: WeatherRepo, language: String) {
+    val newLocationValues: List<String>
+
+    when (language) {
+        "English" -> {
+            newLocationValues = listOf(
+                context.getString(R.string.gps),
+                context.getString(R.string.map)
+            )
+        }
+
+        "العربية" -> {
+            newLocationValues = listOf(
+                context.getString(R.string.gps),
+                context.getString(R.string.map)
+            )
+        }
+
+        "Türkiye" -> {
+            newLocationValues = listOf(
+                context.getString(R.string.gps),
+                context.getString(R.string.map)
+            )
+        }
+
+        else -> {
+
+            newLocationValues = listOf(
+                context.getString(R.string.gps),
+                context.getString(R.string.map)
+            )
+        }
+    }
+
+    val currentLocation = repo.getLocationSource()
+
+    val updatedLocation = when (currentLocation) {
+        context.getString(R.string.gps) -> newLocationValues[0]
+        context.getString(R.string.map) -> newLocationValues[1]
+        else -> newLocationValues[0]
+    }
+
+    repo.setLocationSource(updatedLocation)
 }
 
 fun createNotification(
@@ -282,8 +302,7 @@ fun createNotification(
         putExtra("ALARM_ID", alarmId)
         putExtra("ALARM_ACTION", "OPEN")
     }
-    var newAlarmId = alarmId+10
-    Log.i("TAG", "createNotification: $newAlarmId")
+    var newAlarmId = alarmId + 10
     val openPendingIntent = PendingIntent.getBroadcast(
         context,
         newAlarmId,
@@ -292,8 +311,8 @@ fun createNotification(
     )
 
     val notification = NotificationCompat.Builder(context, "ALARM_CHANNEL")
-        .setContentTitle("Alarm: Weather awaits!")
-        .setContentText("Current weather: $weatherDescription")
+        .setContentTitle(context.getString(R.string.alarm_weather_awaits))
+        .setContentText(context.getString(R.string.current_weather, weatherDescription))
         .setSmallIcon(R.drawable.shower_rain)
         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
         .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -301,12 +320,12 @@ fun createNotification(
         .setAutoCancel(true)
         .addAction(
             R.drawable.broken_clouds,
-            "Cancel",
+            context.getString(R.string.close),
             cancelPendingIntent
         )
         .addAction(
             R.drawable.broken_clouds,
-            "Open",
+            context.getString(R.string.open),
             openPendingIntent
         )
         .setDeleteIntent(deletePendingIntent)

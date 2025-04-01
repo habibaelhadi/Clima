@@ -2,7 +2,6 @@ package com.example.clima.composable.settings.view
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
 import com.example.clima.composable.settings.viewmodel.SettingsViewModel
@@ -55,19 +55,19 @@ import com.example.clima.repo.WeatherRepo
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.utilites.setLocale
+import com.example.clima.utilites.updateLocationBasedOnLanguage
 import com.example.clima.utilites.updateUnitsBasedOnLanguage
 
 @Composable
 fun SettingsScreen(navigateToMap : (Boolean) -> Unit) {
 
+    val repo =  WeatherRepo.getInstance(
+        WeatherRemoteDataSource(RetrofitProduct.retrofit),
+        WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+        SharedPreferencesDataSource.getInstance(LocalContext.current)
+    )
     val settingsFactory =
-        SettingsViewModel.SettingsViewModelFactory(
-            WeatherRepo.getInstance(
-                WeatherRemoteDataSource(RetrofitProduct.retrofit),
-                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
-                SharedPreferencesDataSource.getInstance(LocalContext.current)
-            )
-        )
+        SettingsViewModel.SettingsViewModelFactory(repo)
     val viewModel: SettingsViewModel = viewModel(factory = settingsFactory)
 
     Column(
@@ -76,18 +76,18 @@ fun SettingsScreen(navigateToMap : (Boolean) -> Unit) {
         verticalArrangement = Arrangement.Top
     ) {
         val context = LocalContext.current
-        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        LanguageSettingsScreen(context, sharedPreferences)
-        UnitsSettingsScreen(context, sharedPreferences)
-        LocationSettingsScreen(viewModel, sharedPreferences,navigateToMap)
+        LanguageSettingsScreen(context, repo,viewModel)
+        UnitsSettingsScreen(viewModel)
+        LocationSettingsScreen(viewModel,navigateToMap)
     }
 }
 
 @Composable
-fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
-    val language = sharedPreferences.getString("app_language", "English") ?: "English"
+fun LanguageSettingsScreen(context: Context, repo: WeatherRepo, viewModel: SettingsViewModel) {
 
+    val language = viewModel.languageFlow.collectAsStateWithLifecycle().value
     val savedLanguage = remember { mutableStateOf(language) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -111,10 +111,11 @@ fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreference
             options = listOf("English", "العربية", "Türkiye"),
             defaultValue = savedLanguage // Correctly set the saved language
         ) { newLanguage ->
-            sharedPreferences.edit().putString("app_language", newLanguage).apply()
+            viewModel.setLanguage(newLanguage)
             setLocale(context, newLanguage)
 
-            updateUnitsBasedOnLanguage(context,sharedPreferences,newLanguage)
+            updateUnitsBasedOnLanguage(context,repo,newLanguage)
+            updateLocationBasedOnLanguage(context,repo,newLanguage)
 
             // Restart activity to apply language change
             val intent = Intent(context, MainActivity::class.java)
@@ -130,12 +131,10 @@ fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreference
 @Composable
 fun LocationSettingsScreen(
     viewModel: SettingsViewModel,
-    sharedPreferences: SharedPreferences,
     navigateToMap: (Boolean) -> Unit
 ) {
-    val gps = stringResource(R.string.gps)
     val map = stringResource(R.string.map)
-    val location = sharedPreferences.getString("app_location", gps) ?: gps
+    val location = viewModel.locationFlow.collectAsStateWithLifecycle().value
 
     val savedLocation = remember { mutableStateOf(location) }
 
@@ -176,17 +175,15 @@ fun LocationSettingsScreen(
 }
 
 @Composable
-fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
+fun UnitsSettingsScreen(viewModel: SettingsViewModel) {
 
     val celsius = stringResource(R.string.celsius_c)
     val fahrenheit = stringResource(R.string.fahrenheit_f)
     val miles = stringResource(R.string.miles_per_hour_m_h)
     val meters = stringResource(R.string.meters_per_second_m_s)
 
-    var temp = sharedPreferences.getString("app_temp",
-        celsius) ?: celsius
-    var wind =  sharedPreferences.getString("app_wind",
-        miles) ?: miles
+    var temp = viewModel.tempFlow.collectAsStateWithLifecycle().value
+    var wind =  viewModel.windFlow.collectAsStateWithLifecycle().value
 
     val savedTemp = remember { mutableStateOf(temp) }
     val savedWind = remember { mutableStateOf(wind) }
@@ -220,7 +217,7 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
             defaultValue = savedTemp
         ) { newTemp ->
             savedTemp.value = newTemp
-            sharedPreferences.edit().putString("app_temp", newTemp).apply()
+            viewModel.setTemp(newTemp)
 
             // Automatically update wind speed unit based on temperature unit
             val updatedWind = when (newTemp) {
@@ -230,7 +227,7 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
 
             if (updatedWind != savedWind.value) {
                 savedWind.value = updatedWind
-                sharedPreferences.edit().putString("app_wind", updatedWind).apply()
+                viewModel.setWind(updatedWind)
             }
         }
 
@@ -244,7 +241,7 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
             defaultValue = savedWind
         ) { newWind ->
             savedWind.value = newWind
-            sharedPreferences.edit().putString("app_wind", newWind).apply()
+            viewModel.setWind(newWind)
 
             val updateTemp = when(newWind){
                 miles -> fahrenheit
@@ -254,7 +251,7 @@ fun UnitsSettingsScreen(context: Context, sharedPreferences: SharedPreferences) 
 
             if(updateTemp != savedTemp.value){
                 savedTemp.value = updateTemp
-                sharedPreferences.edit().putString("app_temp", updateTemp).apply()
+                viewModel.setTemp(updateTemp)
             }
         }
 

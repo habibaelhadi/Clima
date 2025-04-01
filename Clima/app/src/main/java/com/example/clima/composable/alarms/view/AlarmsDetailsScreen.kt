@@ -194,7 +194,7 @@ fun DateTimePickerField(
 
 fun showDatePicker(context: Context, onDateSelected: (String) -> Unit) {
     val calendar = Calendar.getInstance()
-    DatePickerDialog(
+    val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
             onDateSelected("$dayOfMonth/${month + 1}/$year")
@@ -202,7 +202,9 @@ fun showDatePicker(context: Context, onDateSelected: (String) -> Unit) {
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
+    )
+    datePickerDialog.datePicker.minDate = calendar.timeInMillis
+    datePickerDialog.show()
 }
 
 fun showTimePicker(context: Context, onTimeSelected: (String) -> Unit) {
