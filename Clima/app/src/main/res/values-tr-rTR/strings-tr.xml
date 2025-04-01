@@ -46,4 +46,9 @@
     <string name="mile_hour"> mil/sa</string>
     <string name="percent"> %</string>
     <string name="hpa"> hPa</string>
+    <string name="save_as_location">Konum olarak kaydet</string>
+    <string name="alarm_weather_awaits">Alarm: Hava durumu bekliyor!</string>
+    <string name="current_weather">Mevcut hava durumu: %1$s</string>
+    <string name="open">Aç</string>
+    <string name="weather_data_not_available">Hava durumu verileri mevcut değil</string>
 </resources>

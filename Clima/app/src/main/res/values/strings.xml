@@ -47,4 +47,8 @@
     <string name="percent"> %</string>
     <string name="hpa"> hPa</string>
     <string name="save_as_location">Save as location</string>
+    <string name="alarm_weather_awaits">Alarm: Weather awaits!</string>
+    <string name="current_weather">Current weather: %1$s</string>
+    <string name="open">Open</string>
+    <string name="weather_data_not_available">Weather data not available</string>
 </resources>

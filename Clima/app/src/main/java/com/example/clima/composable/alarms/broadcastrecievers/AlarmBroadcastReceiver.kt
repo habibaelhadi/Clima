@@ -4,18 +4,19 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import com.example.clima.mainactivity.view.MainActivity
+import com.example.clima.R
 import com.example.clima.composable.alarms.manager.AlarmScheduler
 import com.example.clima.local.AppDataBase
 import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
+import com.example.clima.mainactivity.view.MainActivity
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.MyMediaPlayer
 import com.example.clima.utilites.createNotification
 import com.example.clima.utilites.getLanguageCode
+import com.example.clima.utilites.getTempUnit
 import com.example.clima.utilites.playAudio
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,6 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
         if (context == null || intent == null) return
 
         var alarmId = intent.getIntExtra("ALARM_ID", -1)
-        Log.i("TAG", "onReceive: $alarmId")
         if (alarmId == -1) return
 
         val action = intent.getStringExtra("ALARM_ACTION")
@@ -77,12 +77,15 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
     }
 
     private suspend fun handleAlarmStart(context: Context, alarmId: Int, repository: WeatherRepo) {
-        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
-        val language = getLanguageCode(savedLanguage).toString()
 
-        val weatherFlow = repository.getCurrentWeather(50.0, 70.0, "metric", language)
-        var weatherDescription = "Weather data not available"
+        val savedLanguage = repository.getLanguage()
+        val language = getLanguageCode(savedLanguage).toString()
+        val lat = repository.getMapCoordinates().first.toDouble()
+        val  lng = repository.getMapCoordinates().second.toDouble()
+        val unit = getTempUnit(repository.getTemperatureUnit())
+        
+        val weatherFlow = repository.getCurrentWeather(lat, lng, unit, language)
+        var weatherDescription = context.getString(R.string.weather_data_not_available)
 
         weatherFlow.collect { weatherResponse ->
             weatherResponse.weather.let {

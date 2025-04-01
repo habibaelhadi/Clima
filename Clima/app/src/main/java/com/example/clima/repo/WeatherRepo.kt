@@ -87,6 +87,14 @@ class WeatherRepo private constructor(
         return sharedPreferencesDataSource.getLocationSource()
     }
 
+    override fun setSplashState(state: Boolean) {
+        sharedPreferencesDataSource.setSplashState(state)
+    }
+
+    override fun getSplashState(): Boolean {
+        return sharedPreferencesDataSource.getSplashState()
+    }
+
     override fun setTemperatureUnit(unit: String) {
        sharedPreferencesDataSource.setTemperatureUnit(unit)
     }

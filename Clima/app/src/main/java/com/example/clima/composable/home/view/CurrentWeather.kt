@@ -155,8 +155,8 @@ private fun ForeCastValue(
     description: String,
     tempUnit: String
 ) {
-    val isLargeTemp = degree.length > 2  // Check if degree has more than 2 digits
-    val fontSize = if (isLargeTemp) 50.sp else 80.sp // Adjust font size
+    val isLargeTemp = degree.length > 2
+    val fontSize = if (isLargeTemp) 50.sp else 60.sp
 
     Column(
         modifier = modifier, horizontalAlignment = Alignment.Start

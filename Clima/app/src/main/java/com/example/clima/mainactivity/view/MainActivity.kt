@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
@@ -81,7 +80,6 @@ const val REQUEST_LOCATION_CODE = 2005
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationProviderClient : FusedLocationProviderClient
-    private lateinit var sharedPreferences : SharedPreferences
 
    private lateinit var viewModel: MainActivityViewModel
 
@@ -97,10 +95,9 @@ class MainActivity : ComponentActivity() {
 
         viewModel = MainActivityViewModel(weatherRepo)
 
-        sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-        val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
-        val skipSplash = sharedPreferences.getBoolean("skip_splash", false)
+        val savedLanguage = viewModel.getLanguageForLocale()
+        val skipSplash = viewModel.getSplashStateForActivity()
         setLocale(this, savedLanguage)
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
@@ -135,12 +132,12 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        sharedPreferences.edit().putBoolean("skip_splash", false).apply()
+        viewModel.setSplashState(false)
     }
 
     override fun onStart() {
         super.onStart()
-        if(sharedPreferences.getString("app_location","GPS")
+        if(viewModel.getLocation()
             == getString(R.string.gps)){
             if (checkPermissions()) {
                 if (isLocationEnabled()) {
@@ -187,11 +184,8 @@ class MainActivity : ComponentActivity() {
     private fun getFreshLocation(){
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
-                sharedPreferences.edit()
-                    .putString("lat", location.latitude.toString())
-                    .putString("lng", location.longitude.toString())
-                    .apply()
-
+                viewModel.setMapCoordinate(location.latitude.toString(),
+                    location.longitude.toString()  )
                 viewModel.getLocationChangeFlow()
             }
         }

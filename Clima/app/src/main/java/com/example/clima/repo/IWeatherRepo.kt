@@ -40,6 +40,9 @@ interface IWeatherRepo {
     fun setLocationSource(source: String)
     fun getLocationSource(): String
 
+    fun setSplashState(state:Boolean)
+    fun getSplashState():Boolean
+
     fun setTemperatureUnit(unit: String)
     fun getTemperatureUnit(): String
 

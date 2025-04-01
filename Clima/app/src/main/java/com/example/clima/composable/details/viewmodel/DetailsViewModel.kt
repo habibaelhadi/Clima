@@ -8,6 +8,7 @@ import com.example.clima.model.ForeCast
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import com.example.clima.utilites.getLanguageCode
 import com.example.clima.utilites.getUnitCode
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +42,7 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
     fun getWeather(lat: Double, lng: Double) {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             val temp = getUnitCode(weatherRepo.getTemperatureUnit())
-            val language = weatherRepo.getLanguage()
+            val language = getLanguageCode(weatherRepo.getLanguage()).toString()
             try {
                 val current = async {
                     weatherRepo.getCurrentWeather(lat, lng, temp, language)

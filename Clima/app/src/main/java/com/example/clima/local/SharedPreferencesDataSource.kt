@@ -54,6 +54,17 @@ class SharedPreferencesDataSource private constructor(val context : Context) : I
         return value ?: context.getString(R.string.gps)
     }
 
+    override fun setSplashState(state: Boolean) {
+        prefs.edit()
+            .putBoolean("skip_splash", state)
+            .apply()
+    }
+
+    override fun getSplashState(): Boolean {
+        val value = prefs.getBoolean("skip_splash",false)
+        return value
+    }
+
     override fun setTemperatureUnit(unit: String) {
         prefs.edit()
             .putString("app_temp", unit)
