@@ -22,37 +22,44 @@ import com.google.gson.Gson
 fun SetupNavHost(
     navController: NavHostController,
     snackbar: SnackbarHostState
-){
+) {
     NavHost(
         navController = navController,
         startDestination = RoutesScreens.Home.route
-    ){
-        composable(RoutesScreens.Home.route){
+    ) {
+        composable(RoutesScreens.Home.route) {
             HomeScreen()
         }
 
-        composable(RoutesScreens.Favourites.route){
-            FavouritesScreen( snackbar,
+        composable(RoutesScreens.Favourites.route) {
+            FavouritesScreen(snackbar,
                 navigateToMap = {
-                    navController.navigate(RoutesScreens.Map.route)
+                    navController.navigate(RoutesScreens.Map.route(false))
                 },
-                navigateToDetails = {location ->
+                navigateToDetails = { location ->
                     val gson = Gson()
                     val jsonString = gson.toJson(location)
-                navController.navigate(RoutesScreens.FavouriteDetails.route(jsonString))
-            })
+                    navController.navigate(RoutesScreens.FavouriteDetails.route(jsonString))
+                })
         }
 
-        composable(RoutesScreens.Alarms.route){
+        composable(RoutesScreens.Alarms.route) {
             AlarmsScreen(snackbar)
         }
 
-        composable(RoutesScreens.Settings.route){
-            SettingsScreen()
+        composable(RoutesScreens.Settings.route) {
+            SettingsScreen { isSettings ->
+                navController.navigate(RoutesScreens.Map.route(isSettings))
+            }
         }
 
-        composable(RoutesScreens.Map.route){
-            MapScreen()
+        composable(
+            route = RoutesScreens.Map.route,
+            arguments = listOf( navArgument("isSettings"){type = NavType.BoolType})
+        ) {
+            backStackEntry ->
+            val isSettings = backStackEntry.arguments?.getBoolean("isSettings") ?: false
+            MapScreen(isSettings)
         }
 
         composable(

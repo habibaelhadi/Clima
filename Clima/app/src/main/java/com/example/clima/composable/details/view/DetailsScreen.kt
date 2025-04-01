@@ -1,6 +1,5 @@
 package com.example.clima.composable.details.view
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -31,6 +28,7 @@ import com.example.clima.composable.home.view.HourlyWeather
 import com.example.clima.composable.home.view.LocationDetails
 import com.example.clima.composable.home.view.WeeklyForecast
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.remote.RetrofitProduct
@@ -39,7 +37,6 @@ import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
 import com.example.clima.utilites.getAirItems
-import com.example.clima.utilites.getLanguageCode
 import com.example.clima.utilites.getTempUnit
 import com.example.clima.utilites.getWindSpeedUnitSymbol
 
@@ -51,29 +48,18 @@ fun DetailsScreen(
         DetailsViewModel.DetailsFactory(
             WeatherRepo.getInstance(
                 WeatherRemoteDataSource(RetrofitProduct.retrofit),
-                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+                SharedPreferencesDataSource.getInstance(LocalContext.current)
             )
         )
     val viewModel: DetailsViewModel = viewModel(factory = detailsFactory)
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage  by remember {
-        mutableStateOf(sharedPreferences.getString("app_language",
-            "English") ?: "English")
-    }
-    val savedTemp  by remember {
-        mutableStateOf( sharedPreferences.getString("app_temp",
-            "Celsius (°C)")?:"Celsius (°C)") }
-    val savedWind  by remember {
-        mutableStateOf(sharedPreferences.getString("app_wind",
-            "Miles per hour (m/h)")?:"Miles per hour (m/h)") }
 
-    val windUnit = context.getWindSpeedUnitSymbol(savedWind)
-    val language = getLanguageCode(savedLanguage).toString()
-    val temp = getTempUnit(savedTemp)
+    val windUnit = context.getWindSpeedUnitSymbol(viewModel.windUnit.collectAsStateWithLifecycle().value)
+    val temp = getTempUnit(viewModel.tempUnit.collectAsStateWithLifecycle().value)
 
     LaunchedEffect (location){
-        viewModel.getWeather(location.latitude, location.longitude,language,temp)
+        viewModel.getWeather(location.latitude, location.longitude)
     }
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
     val data = getAirItems(context)

@@ -5,9 +5,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.example.clima.MainActivity
+import com.example.clima.mainactivity.view.MainActivity
 import com.example.clima.composable.alarms.manager.AlarmScheduler
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
@@ -30,9 +31,10 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
 
         val action = intent.getStringExtra("ALARM_ACTION")
 
-        val repository = WeatherRepo.getInstance(
+        val repository =  WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao())
+            WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao()),
+            SharedPreferencesDataSource.getInstance(context)
         )
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -54,7 +56,8 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
     private suspend fun handleAlarmStop(context: Context, intent: Intent, alarmId: Int, repository: WeatherRepo) {
         val repository = WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao())
+            WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao()),
+            SharedPreferencesDataSource.getInstance(context)
         )
         val alarm = repository.getAlarm(alarmId)
         val isDeleteAction = intent.action == "DELETE" || intent.getBooleanExtra("isDismiss", false)

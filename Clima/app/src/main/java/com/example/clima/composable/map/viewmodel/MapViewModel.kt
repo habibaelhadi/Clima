@@ -115,4 +115,10 @@ class MapViewModel(private val placesClient: PlacesClient,
         }
     }
 
+    fun setMapCoordinates(lat : String,lng : String){
+        viewModelScope.launch {
+            repository.setMapCoordinates(lat,lng)
+            mutableMessage.emit("Location Added Successfully!")
+        }
+    }
 }

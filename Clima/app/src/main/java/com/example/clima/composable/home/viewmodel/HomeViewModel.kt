@@ -9,6 +9,7 @@ import com.example.clima.model.HomePOJO
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import com.example.clima.utilites.getUnitCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,19 +29,41 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
     private val _cachedHome = MutableStateFlow<Response<HomePOJO>>(Response.Loading)
     val cachedHome = _cachedHome.asStateFlow()
 
-    fun getWeather(savedLanguage: String, temp: String) {
+    private val _tempUnit = MutableStateFlow(weatherRepo.getTemperatureUnit())
+    val tempUnit = _tempUnit.asStateFlow()
+
+    private val _windUnit = MutableStateFlow(weatherRepo.getWindSpeedUnit())
+    val windUnit = _windUnit.asStateFlow()
+
+    private val _language = MutableStateFlow(weatherRepo.getLanguage())
+    val language = _language.asStateFlow()
+
+    private val _location = MutableStateFlow(weatherRepo.getMapCoordinates())
+    val location = _location.asStateFlow()
+
+    init {
+        getLocation()
+        getLocationChangeFlow()
+    }
+
+    fun getWeather() {
         viewModelScope.launch(Dispatchers.IO) {
+
+            val lat = weatherRepo.getMapCoordinates().first.toDouble()
+            val lng = weatherRepo.getMapCoordinates().second.toDouble()
+            val temp = getUnitCode(weatherRepo.getTemperatureUnit())
+            val savedLanguage = weatherRepo.getLanguage()
 
             try {
                 val current = async {
-                    weatherRepo.getCurrentWeather(31.252321, 29.992283, temp, savedLanguage)
+                    weatherRepo.getCurrentWeather(lat, lng, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .first()
                 }
                 val forecast = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, temp, savedLanguage)
+                    weatherRepo.getForecast(lat, lng, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -51,7 +74,7 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         .firstOrNull() ?: emptyList()
                 }
                 val hourly = async {
-                    weatherRepo.getForecast(31.252321, 29.992283, temp, savedLanguage)
+                    weatherRepo.getForecast(lat, lng, temp, savedLanguage)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -87,6 +110,38 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                 .collect{
                     _cachedHome.value = Response.Success(it)
                 }
+        }
+    }
+
+    fun getTempUnit(){
+        viewModelScope.launch {
+           _tempUnit.value =  weatherRepo.getTemperatureUnit()
+        }
+    }
+
+    fun getWindUnit(){
+        viewModelScope.launch {
+            _windUnit.value =  weatherRepo.getWindSpeedUnit()
+        }
+    }
+
+    fun getLanguage(){
+        viewModelScope.launch {
+            _language.value = weatherRepo.getLanguage()
+        }
+    }
+
+    private fun getLocation(){
+        viewModelScope.launch {
+            _location.value = weatherRepo.getMapCoordinates()
+        }
+    }
+
+    private fun getLocationChangeFlow(){
+        viewModelScope.launch {
+            weatherRepo.getLocationChange().collect{
+                _location.value = it
+            }
         }
     }
 

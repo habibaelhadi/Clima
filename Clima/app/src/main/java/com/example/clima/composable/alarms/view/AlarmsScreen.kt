@@ -49,6 +49,7 @@ import com.example.clima.composable.alarms.manager.AlarmScheduler
 import com.example.clima.composable.alarms.viewmodel.AlarmViewModel
 import com.example.clima.composable.favourites.view.SwipeToDeleteContainer
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.model.Alarm
 import com.example.clima.remote.RetrofitProduct
@@ -58,6 +59,7 @@ import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.ui.theme.colorGradient2
 import com.example.clima.ui.theme.colorGradient3
+import com.example.clima.utilites.formatNumberBasedOnLanguage
 
 @Composable
 fun AlarmsScreen(snackbar: SnackbarHostState) {
@@ -67,7 +69,8 @@ fun AlarmsScreen(snackbar: SnackbarHostState) {
     val alarmFactory = AlarmViewModel.AlarmFactory(
         WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+            SharedPreferencesDataSource.getInstance(LocalContext.current)
         )
     )
 
@@ -78,19 +81,19 @@ fun AlarmsScreen(snackbar: SnackbarHostState) {
 
     Scaffold(
         floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-                        isSheetOpen.value = true
-                    },
-                    containerColor = colorGradient1,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        Icons.Default.DateRange,
-                        contentDescription = "Favorite",
-                        tint = Color.White
-                    )
-                }
+            FloatingActionButton(
+                onClick = {
+                    isSheetOpen.value = true
+                },
+                containerColor = colorGradient1,
+                shape = CircleShape
+            ) {
+                Icon(
+                    Icons.Default.DateRange,
+                    contentDescription = "Favorite",
+                    tint = Color.White
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -98,13 +101,13 @@ fun AlarmsScreen(snackbar: SnackbarHostState) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if(alarms.isEmpty()){
+            if (alarms.isEmpty()) {
                 NoAlarms()
-            }else{
-                AlarmsList(alarms,viewModel,snackbar)
+            } else {
+                AlarmsList(alarms, viewModel, snackbar)
             }
             if (isSheetOpen.value) {
-                AlarmsDetails(isSheetOpen,viewModel)
+                AlarmsDetails(isSheetOpen, viewModel)
             }
         }
     }
@@ -191,22 +194,24 @@ fun AlarmsList(alarms: List<Alarm>, viewModel: AlarmViewModel, snackbar: Snackba
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(alarms.size) {
-                AlarmCard(alarms[it],viewModel,snackbar)
+                AlarmCard(alarms[it], viewModel, snackbar)
             }
         }
     }
 }
 
 @Composable
-fun AlarmCard(alarm: Alarm,
-              viewModel: AlarmViewModel,
-              snackbar: SnackbarHostState) {
+fun AlarmCard(
+    alarm: Alarm,
+    viewModel: AlarmViewModel,
+    snackbar: SnackbarHostState
+) {
 
     val context = LocalContext.current
     val alarmScheduler = remember { AlarmScheduler(context) }
 
     SwipeToDeleteContainer(
-        item = alarm ,
+        item = alarm,
         onDelete = { item ->
             viewModel.deleteAlarm(item)
             alarmScheduler.cancelAlarm(item)
@@ -249,19 +254,22 @@ fun AlarmCard(alarm: Alarm,
                             .size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Row{
+                    Row {
                         Text(
-                            text = "Start date: ${alarm.startTime}",
+                            text = stringResource(R.string.start_time) + formatNumberBasedOnLanguage(
+                                alarm.startTime
+                            ),
                             fontFamily = FontFamily(Font(R.font.exo2)),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
                             color = Gray
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "End date: ${alarm.endTime}",
+                            text = stringResource(R.string.end_time) + formatNumberBasedOnLanguage(
+                                alarm.endTime
+                            ),
                             fontFamily = FontFamily(Font(R.font.exo2)),
-                            fontSize = 18.sp,
+                            fontSize = 14.sp,
                             color = Gray
                         )
                     }

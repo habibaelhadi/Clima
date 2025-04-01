@@ -46,4 +46,5 @@
     <string name="mile_hour"> m/h</string>
     <string name="percent"> %</string>
     <string name="hpa"> hPa</string>
+    <string name="save_as_location">Save as location</string>
 </resources>

@@ -42,15 +42,33 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.clima.MainActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
+import com.example.clima.composable.settings.viewmodel.SettingsViewModel
+import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
+import com.example.clima.local.WeatherLocalDataSource
+import com.example.clima.mainactivity.view.MainActivity
+import com.example.clima.remote.RetrofitProduct
+import com.example.clima.remote.WeatherRemoteDataSource
+import com.example.clima.repo.WeatherRepo
 import com.example.clima.ui.theme.Gray
 import com.example.clima.ui.theme.colorGradient1
 import com.example.clima.utilites.setLocale
 import com.example.clima.utilites.updateUnitsBasedOnLanguage
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navigateToMap : (Boolean) -> Unit) {
+
+    val settingsFactory =
+        SettingsViewModel.SettingsViewModelFactory(
+            WeatherRepo.getInstance(
+                WeatherRemoteDataSource(RetrofitProduct.retrofit),
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+                SharedPreferencesDataSource.getInstance(LocalContext.current)
+            )
+        )
+    val viewModel: SettingsViewModel = viewModel(factory = settingsFactory)
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -61,7 +79,7 @@ fun SettingsScreen() {
         val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         LanguageSettingsScreen(context, sharedPreferences)
         UnitsSettingsScreen(context, sharedPreferences)
-        LocationSettingsScreen(context, sharedPreferences)
+        LocationSettingsScreen(viewModel, sharedPreferences,navigateToMap)
     }
 }
 
@@ -110,11 +128,17 @@ fun LanguageSettingsScreen(context: Context, sharedPreferences: SharedPreference
 }
 
 @Composable
-fun LocationSettingsScreen(context: Context, sharedPreferences: SharedPreferences) {
+fun LocationSettingsScreen(
+    viewModel: SettingsViewModel,
+    sharedPreferences: SharedPreferences,
+    navigateToMap: (Boolean) -> Unit
+) {
     val gps = stringResource(R.string.gps)
+    val map = stringResource(R.string.map)
     val location = sharedPreferences.getString("app_location", gps) ?: gps
 
     val savedLocation = remember { mutableStateOf(location) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -140,7 +164,10 @@ fun LocationSettingsScreen(context: Context, sharedPreferences: SharedPreference
             ),
             defaultValue = savedLocation
         ) { newLocation ->
-            sharedPreferences.edit().putString("app_location", newLocation).apply()
+            viewModel.setLocationSource(newLocation)
+            if(newLocation == map){
+                navigateToMap(true)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

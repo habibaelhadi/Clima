@@ -52,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
 import com.example.clima.composable.favourites.viewmodel.FavouriteViewModel
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.remote.RetrofitProduct
@@ -74,7 +75,8 @@ fun FavouritesScreen(
     val favFactory = FavouriteViewModel.FavFactory(
         WeatherRepo.getInstance(
             WeatherRemoteDataSource(RetrofitProduct.retrofit),
-            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+            WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+            SharedPreferencesDataSource.getInstance(LocalContext.current)
         )
     )
 
