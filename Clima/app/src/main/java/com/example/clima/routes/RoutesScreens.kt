@@ -19,7 +19,9 @@ sealed class RoutesScreens (val route: String, val label: String, val icon: Int)
     object Settings : RoutesScreens("settings","Settings", R.drawable.baseline_settings_24)
 
     @Serializable
-    object Map : RoutesScreens("map","Map", R.drawable.baseline_location_pin_24)
+    object Map : RoutesScreens("map/{isSettings}","Map", R.drawable.baseline_location_pin_24){
+        fun route(isSettings : Boolean) = "map/$isSettings"
+    }
 
     @Serializable
     object FavouriteDetails : RoutesScreens("favDetails/{location}", "Details", R.drawable.country) {

@@ -8,6 +8,7 @@ import com.example.clima.model.ForeCast
 import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
+import com.example.clima.utilites.getUnitCode
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,18 +29,29 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         _currentWeather.value = Response.Failure(throwable.message.toString())
     }
 
-    fun getWeather(lat: Double, lng: Double, language: String) {
+    private val _tempUnit = MutableStateFlow(weatherRepo.getTemperatureUnit())
+    val tempUnit = _tempUnit.asStateFlow()
+
+    private val _windUnit = MutableStateFlow(weatherRepo.getWindSpeedUnit())
+    val windUnit = _windUnit.asStateFlow()
+
+    private val _language = MutableStateFlow(weatherRepo.getLanguage())
+    val language = _language.asStateFlow()
+
+    fun getWeather(lat: Double, lng: Double) {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            val temp = getUnitCode(weatherRepo.getTemperatureUnit())
+            val language = weatherRepo.getLanguage()
             try {
                 val current = async {
-                    weatherRepo.getCurrentWeather(lat, lng, "metric", language)
+                    weatherRepo.getCurrentWeather(lat, lng, temp, language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
                         .first()
                 }
                 val forecast = async {
-                    weatherRepo.getForecast(lat, lng, "metric", language)
+                    weatherRepo.getForecast(lat, lng, temp, language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -50,7 +62,7 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
                         .firstOrNull() ?: emptyList()
                 }
                 val hourly = async {
-                    weatherRepo.getForecast(lat, lng, "metric", language)
+                    weatherRepo.getForecast(lat, lng, temp, language)
                         .catch {
                             _currentWeather.value = Response.Failure(it.message.toString())
                         }
@@ -67,6 +79,23 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
         }
     }
 
+    fun getTempUnit(){
+        viewModelScope.launch {
+            _tempUnit.value =  weatherRepo.getTemperatureUnit()
+        }
+    }
+
+    fun getWindUnit(){
+        viewModelScope.launch {
+            _windUnit.value =  weatherRepo.getWindSpeedUnit()
+        }
+    }
+
+    fun getLanguage(){
+        viewModelScope.launch {
+            _language.value = weatherRepo.getLanguage()
+        }
+    }
 
     class DetailsFactory(private val repo: WeatherRepo) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

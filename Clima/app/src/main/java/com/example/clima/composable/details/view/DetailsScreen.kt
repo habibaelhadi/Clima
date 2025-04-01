@@ -1,6 +1,5 @@
 package com.example.clima.composable.details.view
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +28,7 @@ import com.example.clima.composable.home.view.HourlyWeather
 import com.example.clima.composable.home.view.LocationDetails
 import com.example.clima.composable.home.view.WeeklyForecast
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.model.FavouritePOJO
 import com.example.clima.remote.RetrofitProduct
@@ -37,7 +37,8 @@ import com.example.clima.repo.WeatherRepo
 import com.example.clima.utilites.Response
 import com.example.clima.utilites.dailyForecasts
 import com.example.clima.utilites.getAirItems
-import com.example.clima.utilites.getLanguageCode
+import com.example.clima.utilites.getTempUnit
+import com.example.clima.utilites.getWindSpeedUnitSymbol
 
 @Composable
 fun DetailsScreen(
@@ -47,16 +48,18 @@ fun DetailsScreen(
         DetailsViewModel.DetailsFactory(
             WeatherRepo.getInstance(
                 WeatherRemoteDataSource(RetrofitProduct.retrofit),
-                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+                SharedPreferencesDataSource.getInstance(LocalContext.current)
             )
         )
     val viewModel: DetailsViewModel = viewModel(factory = detailsFactory)
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
-    val language = getLanguageCode(savedLanguage).toString()
+
+    val windUnit = context.getWindSpeedUnitSymbol(viewModel.windUnit.collectAsStateWithLifecycle().value)
+    val temp = getTempUnit(viewModel.tempUnit.collectAsStateWithLifecycle().value)
+
     LaunchedEffect (location){
-        viewModel.getWeather(location.latitude, location.longitude,language)
+        viewModel.getWeather(location.latitude, location.longitude)
     }
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
     val data = getAirItems(context)
@@ -84,26 +87,30 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = location.currentWeather
+                        weatherResponse = location.currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = location.currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
                         data = location.forecast.dailyForecasts()
                             .flatMap {
                                 it.value.take(1)
-                            }
+                            },
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = location.forecast.list.subList(0,8)
+                        data = location.forecast.list.subList(0,8),
+                        tempUnit = temp
                     )
                 }
             }
@@ -121,23 +128,27 @@ fun DetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = currentWeather
+                        weatherResponse = currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
-                        data = forecast
+                        data = forecast,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = hourly
+                        data = hourly,
+                        tempUnit = temp
                     )
                 }
             }

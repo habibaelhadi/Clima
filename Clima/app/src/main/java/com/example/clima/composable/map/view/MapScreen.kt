@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clima.R
 import com.example.clima.composable.map.viewmodel.MapViewModel
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
@@ -53,7 +54,7 @@ import com.google.maps.android.compose.rememberMarkerState
 import java.util.Locale
 
 @Composable
-fun MapScreen() {
+fun MapScreen(isSettings: Boolean) {
         val context = LocalContext.current
 
         // Initialize Places API (outside ViewModel)
@@ -63,9 +64,10 @@ fun MapScreen() {
         // Create ViewModel with custom factory
         val mapScreenFactory = MapViewModel.MapViewModelFactory(
             placesClient = placesClient,
-            repository = WeatherRepo.getInstance(
+            repository =  WeatherRepo.getInstance(
                 WeatherRemoteDataSource(RetrofitProduct.retrofit),
-                WeatherLocalDataSource(AppDataBase.getInstance(context).weatherDao())
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+                SharedPreferencesDataSource.getInstance(LocalContext.current)
             )
         )
         val viewModel: MapViewModel = viewModel(factory = mapScreenFactory)
@@ -174,19 +176,30 @@ fun MapScreen() {
 
                         Button(
                             onClick = {
-                                viewModel.insertFavouriteLocation(
-                                    location.latitude,
-                                    location.longitude,
-                                    country.country!!,
-                                    country.city!!
-                                )
+                                if(isSettings){
+                                    viewModel.setMapCoordinates(location.latitude.toString(),
+                                        location.longitude.toString())
+                                }else{
+                                    viewModel.insertFavouriteLocation(
+                                        location.latitude,
+                                        location.longitude,
+                                        country.country!!,
+                                        country.city!!
+                                    )
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(colorResource(R.color.purple)),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = stringResource(R.string.add_to_favourites),
+                                text =
+                                    if(isSettings){
+                                        context.getString(R.string.save_as_location)
+                                    }else{
+                                        context.getString(R.string.add_to_favourites)
+                                    }
+                                ,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colorResource(R.color.white),
                                 fontWeight = FontWeight.Bold

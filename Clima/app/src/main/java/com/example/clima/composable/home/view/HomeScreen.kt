@@ -1,6 +1,5 @@
 package com.example.clima.composable.home.view
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,6 +45,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.clima.R
 import com.example.clima.composable.home.viewmodel.HomeViewModel
 import com.example.clima.local.AppDataBase
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.local.WeatherLocalDataSource
 import com.example.clima.remote.RetrofitProduct
 import com.example.clima.remote.WeatherRemoteDataSource
@@ -60,6 +60,8 @@ import com.example.clima.utilites.Response
 import com.example.clima.utilites.checkForInternet
 import com.example.clima.utilites.getAirItems
 import com.example.clima.utilites.getLanguageCode
+import com.example.clima.utilites.getTempUnit
+import com.example.clima.utilites.getWindSpeedUnitSymbol
 
 
 @Composable
@@ -68,18 +70,21 @@ fun HomeScreen() {
         HomeViewModel.HomeFactory(
             WeatherRepo.getInstance(
                 WeatherRemoteDataSource(RetrofitProduct.retrofit),
-                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao())
+                WeatherLocalDataSource(AppDataBase.getInstance(LocalContext.current).weatherDao()),
+                SharedPreferencesDataSource.getInstance(LocalContext.current)
             )
         )
     val viewModel: HomeViewModel = viewModel(factory = homeFactory)
 
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val savedLanguage = sharedPreferences.getString("app_language", "English") ?: "English"
-    val language = getLanguageCode(savedLanguage).toString()
+
+    val windUnit = context.getWindSpeedUnitSymbol(viewModel.windUnit.collectAsStateWithLifecycle().value)
+    val language = getLanguageCode(viewModel.language.collectAsStateWithLifecycle().value).toString()
+    val temp = getTempUnit(viewModel.tempUnit.collectAsStateWithLifecycle().value)
 
     val uiState by viewModel.currentWeather.collectAsStateWithLifecycle()
     val cacheState by viewModel.cachedHome.collectAsStateWithLifecycle()
+    val location by viewModel.location.collectAsStateWithLifecycle()
 
     val connectivityObserver = remember { ConnectivityObserver(context) }
     val isConnected by connectivityObserver.isConnected.collectAsStateWithLifecycle(
@@ -88,9 +93,9 @@ fun HomeScreen() {
         )
     )
 
-    LaunchedEffect(isConnected, language) {
+    LaunchedEffect(isConnected,language,location) {
         if (isConnected) {
-            viewModel.getWeather(language)
+            viewModel.getWeather()
         }else{
             viewModel.getCachedHome()
         }
@@ -139,23 +144,27 @@ fun HomeScreen() {
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             CurrentWeather(
-                                weatherResponse = home.currentWeather
+                                weatherResponse = home.currentWeather,
+                                tempUnit = temp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             AirQuality(
                                 airQuality = home.currentWeather,
-                                data = data
+                                data = data,
+                                windUnit = windUnit
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             WeeklyForecast(
-                                data = home.foreCast
+                                data = home.foreCast,
+                                tempUnit = temp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             HourlyWeather(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 200.dp),
-                                data = home.hours
+                                data = home.hours,
+                                tempUnit = temp
                             )
                         }
                     }
@@ -190,23 +199,27 @@ fun HomeScreen() {
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     CurrentWeather(
-                        weatherResponse = currentWeather
+                        weatherResponse = currentWeather,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     AirQuality(
                         airQuality = currentWeather,
-                        data = data
+                        data = data,
+                        windUnit = windUnit
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     WeeklyForecast(
-                        data = forecast
+                        data = forecast,
+                        tempUnit = temp
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     HourlyWeather(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 200.dp),
-                        data = hourly
+                        data = hourly,
+                        tempUnit = temp
                     )
                 }
             }

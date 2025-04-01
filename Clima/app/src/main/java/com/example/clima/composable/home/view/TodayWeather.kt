@@ -32,7 +32,8 @@ import com.example.clima.utilites.formatNumberBasedOnLanguage
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    data: List<ForeCast.ForecastWeather>
+    data: List<ForeCast.ForecastWeather>,
+    tempUnit : String
 ) {
     Column(
         modifier = modifier,
@@ -48,7 +49,8 @@ fun HourlyWeather(
         ) {
             items(data) { hour ->
                 HourlyCard(data = hour.convertAPIResponse(
-                    forecast = hour)
+                    forecast = hour),
+                    tempUnit = tempUnit
                 )
             }
         }
@@ -78,7 +80,8 @@ private fun HourlyHeader(
 @Composable
 private fun HourlyCard(
     modifier: Modifier = Modifier,
-    data: ForecastItem
+    data: ForecastItem,
+    tempUnit: String
 ){
     Row(
         modifier = modifier
@@ -112,7 +115,7 @@ private fun HourlyCard(
         )
         val temp = formatNumberBasedOnLanguage(data.temp)
         Text(
-            text = temp+stringResource(R.string.degree),
+            text = temp+tempUnit,
             color = Black,
             fontSize = 14.sp,
             modifier = Modifier

@@ -1,6 +1,7 @@
 package com.example.clima.repo
 
 import com.example.clima.local.IWeatherLocalDataSource
+import com.example.clima.local.SharedPreferencesDataSource
 import com.example.clima.model.Alarm
 import com.example.clima.model.CurrentWeather
 import com.example.clima.model.FavouritePOJO
@@ -12,7 +13,8 @@ import kotlinx.coroutines.flow.Flow
 
 class WeatherRepo private constructor(
     private val weatherRemoteDataSource: IWeatherRemoteDataSource,
-    private val weatherLocalDataSource: IWeatherLocalDataSource
+    private val weatherLocalDataSource: IWeatherLocalDataSource,
+    private val sharedPreferencesDataSource: SharedPreferencesDataSource
 ) : IWeatherRepo  {
 
     override suspend fun getCurrentWeather(
@@ -69,15 +71,68 @@ class WeatherRepo private constructor(
         weatherLocalDataSource.insertCacheHome(home)
     }
 
+    override fun getLocationSourceFlow(): Flow<String> {
+        return sharedPreferencesDataSource.getLocationSourceFlow()
+    }
+
+    override fun getLocationChange(): Flow<Pair<String, String>> {
+        return sharedPreferencesDataSource.getLocationChange()
+    }
+
+    override fun setLocationSource(source: String) {
+        sharedPreferencesDataSource.setLocationSource(source)
+    }
+
+    override fun getLocationSource(): String {
+        return sharedPreferencesDataSource.getLocationSource()
+    }
+
+    override fun setTemperatureUnit(unit: String) {
+       sharedPreferencesDataSource.setTemperatureUnit(unit)
+    }
+
+    override fun getTemperatureUnit(): String {
+        return sharedPreferencesDataSource.getTemperatureUnit()
+    }
+
+    override fun setWindSpeedUnit(unit: String) {
+        sharedPreferencesDataSource.setWindSpeedUnit(unit)
+    }
+
+    override fun getWindSpeedUnit(): String {
+       return sharedPreferencesDataSource.getWindSpeedUnit()
+    }
+
+    override fun setLanguage(language: String) {
+        sharedPreferencesDataSource.setLanguage(language)
+    }
+
+    override fun getLanguage(): String {
+        return sharedPreferencesDataSource.getLanguage()
+    }
+
+    override fun setMapCoordinates(lat: String, lon: String) {
+        sharedPreferencesDataSource.setMapCoordinates(lat,lon)
+    }
+
+    override fun getMapCoordinates(): Pair<String, String> {
+        return sharedPreferencesDataSource.getMapCoordinates()
+    }
+
+    override fun clearPreferences() {
+       sharedPreferencesDataSource.clearPreferences()
+    }
+
     companion object {
         @Volatile
         private var instance: WeatherRepo? = null
         fun getInstance(
             remoteDataSource: WeatherRemoteDataSource,
-            localDataSource: IWeatherLocalDataSource
+            localDataSource: IWeatherLocalDataSource,
+            sharedPreferencesDataSource: SharedPreferencesDataSource
         ): WeatherRepo {
             return instance ?: synchronized(this) {
-                instance ?: WeatherRepo(remoteDataSource,localDataSource).also { instance = it }
+                instance ?: WeatherRepo(remoteDataSource,localDataSource,sharedPreferencesDataSource).also { instance = it }
             }
         }
     }

@@ -34,7 +34,8 @@ import com.example.clima.utilites.formatNumberBasedOnLanguage
 fun AirQuality(
     modifier: Modifier = Modifier,
     data: List<AirQualityItem>,
-    airQuality : CurrentWeather
+    airQuality : CurrentWeather,
+    windUnit : String
 ) {
     val humidityActual = airQuality.main.humidity.toString()
     val humidity = formatNumberBasedOnLanguage(humidityActual)
@@ -45,10 +46,10 @@ fun AirQuality(
     val cloudsActual = airQuality.clouds.all.toString()
     val clouds = formatNumberBasedOnLanguage(cloudsActual)
 
-    data[0].value = windSpeed
-    data[1].value = pressure
-    data[2].value = humidity
-    data[3].value = clouds
+    data[0].value = windSpeed+windUnit
+    data[1].value = pressure+ stringResource(R.string.hpa)
+    data[2].value = humidity+ stringResource(R.string.percent)
+    data[3].value = clouds+stringResource(R.string.percent)
 
     Surface(
         modifier = modifier.fillMaxWidth(),

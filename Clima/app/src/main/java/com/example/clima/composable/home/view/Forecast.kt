@@ -51,7 +51,8 @@ import com.example.clima.utilites.fromHex
 @Composable
 fun WeeklyForecast(
     modifier: Modifier = Modifier,
-    data: List<ForeCast.ForecastWeather>
+    data: List<ForeCast.ForecastWeather>,
+    tempUnit : String
 ) {
     Column(
         modifier = modifier,
@@ -68,7 +69,9 @@ fun WeeklyForecast(
             ) { item ->
                 ForecastCard(item = item.convertAPIResponse(
                     forecast = item,
-                    true))
+                    true),
+                    tempUnit = tempUnit
+                )
             }
         }
     }
@@ -97,7 +100,8 @@ private fun ForecastHeader(
 @Composable
 private fun ForecastCard(
     modifier: Modifier = Modifier,
-    item: ForecastItem
+    item: ForecastItem,
+    tempUnit : String
 ) {
     val updatedModifier = remember (item.isSelected){
         if(item.isSelected) {
@@ -165,14 +169,15 @@ private fun ForecastCard(
         Spacer(modifier = Modifier.height(6.dp))
         val temp = formatNumberBasedOnLanguage(item.temp)
         Text(
-            text = temp+stringResource(R.string.degree),
+            text = temp+ formatNumberBasedOnLanguage(tempUnit),
             style = tempTextStyle
         )
         Spacer(modifier = Modifier.height(8.dp))
         val airQuality = formatNumberBasedOnLanguage(item.airQuality)
         AirQualityIndicator(
             value = airQuality,
-            color = item.airQualityIndicatorColor
+            color = item.airQualityIndicatorColor,
+            tempUnit = tempUnit
         )
     }
 }
@@ -203,22 +208,24 @@ private fun WeatherIcon(
 private fun AirQualityIndicator(
     modifier: Modifier = Modifier,
     color: String,
-    value: String
-){
-    Surface (
+    value: String,
+    tempUnit: String
+) {
+    Surface(
         modifier = modifier,
         color = Color.fromHex(color),
         contentColor = Black,
         shape = RoundedCornerShape(8.dp)
-    ){
+    ) {
         Box(
             modifier = Modifier
-                .padding(vertical = 2.dp)
-                .width(55.dp),
+                .fillMaxWidth()
+                .padding(vertical = 2.dp, horizontal = 6.dp),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Text(
-                text = value+stringResource(R.string.degree)
+                text = "$value$tempUnit",
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
     }
