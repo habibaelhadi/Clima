@@ -129,7 +129,7 @@ private fun ForecastCard(
                     0f to White,
                     1f to White.copy(alpha = 0.3f)
                 ),
-                fontSize = 24.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Black
             )
         }else{
@@ -153,6 +153,7 @@ private fun ForecastCard(
         Text(
             text = item.dayOfWeek,
             style = MaterialTheme.typography.titleLarge,
+            fontSize = 15.sp,
             fontFamily = FontFamily(Font(R.font.exo2)),
             color = primaryTextColor,
             fontWeight = FontWeight.Bold
@@ -160,6 +161,7 @@ private fun ForecastCard(
         Text(
             text = item.date,
             style = MaterialTheme.typography.titleMedium,
+            fontSize = 14.sp,
             fontFamily = FontFamily(Font(R.font.exo2)),
             color = primaryTextColor,
             fontWeight = FontWeight.Normal
@@ -225,7 +227,9 @@ private fun AirQualityIndicator(
         ) {
             Text(
                 text = "$value$tempUnit",
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                fontFamily = FontFamily(Font(R.font.exo2)),
+                fontSize = 12.sp
             )
         }
     }

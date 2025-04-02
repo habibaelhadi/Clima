@@ -53,7 +53,10 @@ class HomeViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
             val lat = weatherRepo.getMapCoordinates().first.toDouble()
             val lng = weatherRepo.getMapCoordinates().second.toDouble()
             val temp = getUnitCode(weatherRepo.getTemperatureUnit())
-            val savedLanguage = getLanguageCode(weatherRepo.getLanguage()).toString()
+            val savedLanguage = when(getLanguageCode(weatherRepo.getLanguage()).toString()){
+                "ar_EG" -> "ar"
+                else -> getLanguageCode(weatherRepo.getLanguage()).toString()
+            }
 
             try {
                 val current = async {

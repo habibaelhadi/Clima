@@ -94,8 +94,8 @@ class SharedPreferencesDataSource private constructor(val context : Context) : I
     }
 
     override fun getLanguage(): String {
-        val value = prefs.getString("app_language", "English")
-        return value ?: "English"
+        val value = prefs.getString("app_language", context.getString(R.string.system_default))
+        return value ?: context.getString(R.string.system_default)
     }
 
     override fun setMapCoordinates(lat: String, lon: String) {

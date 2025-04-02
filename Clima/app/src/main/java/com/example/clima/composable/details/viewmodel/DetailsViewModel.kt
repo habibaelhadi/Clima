@@ -42,7 +42,10 @@ class DetailsViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
     fun getWeather(lat: Double, lng: Double) {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             val temp = getUnitCode(weatherRepo.getTemperatureUnit())
-            val language = getLanguageCode(weatherRepo.getLanguage()).toString()
+            val language = when(getLanguageCode(weatherRepo.getLanguage()).toString()){
+            "ar_EG" -> "ar"
+            else -> getLanguageCode(weatherRepo.getLanguage()).toString()
+        }
             try {
                 val current = async {
                     weatherRepo.getCurrentWeather(lat, lng, temp, language)

@@ -51,4 +51,5 @@
     <string name="current_weather">Current weather: %1$s</string>
     <string name="open">Open</string>
     <string name="weather_data_not_available">Weather data not available</string>
+    <string name="system_default">System Default</string>
 </resources>

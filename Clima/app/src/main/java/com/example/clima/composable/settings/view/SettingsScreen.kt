@@ -108,14 +108,14 @@ fun LanguageSettingsScreen(context: Context, repo: WeatherRepo, viewModel: Setti
 
         SettingRow(
             label = stringResource(R.string.selected_language),
-            options = listOf("English", "العربية", "Türkiye"),
-            defaultValue = savedLanguage // Correctly set the saved language
+            options = listOf(stringResource(R.string.system_default), "English", "العربية", "Türkiye"),
+            defaultValue = savedLanguage
         ) { newLanguage ->
             viewModel.setLanguage(newLanguage)
             setLocale(context, newLanguage)
 
-            updateUnitsBasedOnLanguage(context,repo,newLanguage)
-            updateLocationBasedOnLanguage(context,repo,newLanguage)
+            updateUnitsBasedOnLanguage(context, repo, newLanguage)
+            updateLocationBasedOnLanguage(context, repo, newLanguage)
 
             // Restart activity to apply language change
             val intent = Intent(context, MainActivity::class.java)
