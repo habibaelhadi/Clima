@@ -8,7 +8,6 @@ import com.example.clima.model.FavouritePOJO
 import com.example.clima.model.ForeCast
 import com.example.clima.model.HomePOJO
 import com.example.clima.remote.IWeatherRemoteDataSource
-import com.example.clima.remote.WeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
 class WeatherRepo private constructor(
@@ -135,7 +134,7 @@ class WeatherRepo private constructor(
         @Volatile
         private var instance: WeatherRepo? = null
         fun getInstance(
-            remoteDataSource: WeatherRemoteDataSource,
+            remoteDataSource: IWeatherRemoteDataSource,
             localDataSource: IWeatherLocalDataSource,
             sharedPreferencesDataSource: SharedPreferencesDataSource
         ): WeatherRepo {
