@@ -51,4 +51,5 @@
     <string name="current_weather">الطقس الحالي: %1$s</string>
     <string name="open">افتح</string>
     <string name="weather_data_not_available">البيانات الجوية غير متوفرة</string>
+    <string name="system_default">النظام </string>
 </resources>

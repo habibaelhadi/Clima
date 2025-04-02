@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -62,7 +63,16 @@ fun checkForInternet(context: Context): Boolean {
 }
 
 fun setLocale(context: Context, language: String) {
-    val locale = getLanguageCode(language)
+    val locale = when (language) {
+        context.getString(R.string.system_default) -> {
+            // Use system default locale
+            Resources.getSystem().configuration.locales.get(0)
+        }
+        else -> {
+            // Use the selected language
+            getLanguageCode(language)
+        }
+    }
 
     Locale.setDefault(locale)
 
@@ -70,6 +80,7 @@ fun setLocale(context: Context, language: String) {
     config.setLocale(locale)
     context.resources.updateConfiguration(config, context.resources.displayMetrics)
 
+    // Save the selected language (could be "System Default")
     val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     sharedPreferences.edit()
         .putString("app_language", language)
@@ -77,12 +88,13 @@ fun setLocale(context: Context, language: String) {
         .apply()
 }
 
+
 fun getLanguageCode(language: String): Locale {
     return when (language) {
         "English" -> Locale("en")
         "العربية" -> Locale("ar")
         "Türkiye" -> Locale("tr")
-        else -> Locale.getDefault()
+        else -> Resources.getSystem().configuration.locales.get(0)
     }
 }
 
@@ -137,10 +149,18 @@ fun Context.getWindSpeedUnitSymbol(unit: String): String {
 }
 
 fun updateUnitsBasedOnLanguage(context: Context, repo: WeatherRepo, language: String) {
+
+    val systemLanguage = Resources.getSystem().configuration.locales.get(0) // Get system language (e.g., "ar" or "en")
+    val effectiveLanguage = when {
+        language == "العربية" || systemLanguage.toLanguageTag().startsWith("ar") -> "العربية"
+        language == "English" || systemLanguage.toLanguageTag().startsWith("en") -> "English"
+        else -> language
+    }
+
     val newTempUnits: List<String>
     val newWindUnits: List<String>
 
-    when (language) {
+    when (effectiveLanguage) {
         "English" -> {
             newTempUnits = listOf(
                 context.getString(R.string.celsius_c),
@@ -214,7 +234,14 @@ fun updateUnitsBasedOnLanguage(context: Context, repo: WeatherRepo, language: St
 fun updateLocationBasedOnLanguage(context: Context, repo: WeatherRepo, language: String) {
     val newLocationValues: List<String>
 
-    when (language) {
+    val systemLanguage = Resources.getSystem().configuration.locales.get(0) // Get system language (e.g., "ar" or "en")
+    val effectiveLanguage = when {
+        language == "العربية" || systemLanguage.toLanguageTag().startsWith("ar") -> "العربية"
+        language == "English" || systemLanguage.toLanguageTag().startsWith("en") -> "English"
+        else -> language
+    }
+
+    when (effectiveLanguage) {
         "English" -> {
             newLocationValues = listOf(
                 context.getString(R.string.gps),
