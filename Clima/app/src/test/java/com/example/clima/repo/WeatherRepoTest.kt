@@ -62,6 +62,7 @@ class WeatherRepoTest{
     }
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun getCachedHome_returnCachedHome() = runTest {
 
@@ -72,6 +73,7 @@ class WeatherRepoTest{
 
         // When
         val result = repo.getCachedHome()
+        advanceUntilIdle()
 
         // Then
         result.collect { homeData ->
@@ -81,6 +83,7 @@ class WeatherRepoTest{
         verify { localDataSource.getCachedHome() }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun insertAlarm_callLocalDataSourceInsertAlarm() = runTest {
         // Given
@@ -90,6 +93,7 @@ class WeatherRepoTest{
 
         // When
         repo.insertAlarm(alarm)
+        advanceUntilIdle()
 
         // Then
         coVerify { localDataSource.insertAlarm(alarm) }

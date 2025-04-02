@@ -13,7 +13,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -30,6 +32,7 @@ class WeatherDaoTest {
         weatherDao = mockk(relaxed = true)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun getAlarms_returnAlarms() = runTest {
 
@@ -40,6 +43,7 @@ class WeatherDaoTest {
 
         // When
         val result = weatherDao.getAlarms()
+        advanceUntilIdle()
 
         // Then
         result.collect { alarms ->
@@ -49,6 +53,7 @@ class WeatherDaoTest {
         verify { weatherDao.getAlarms() }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun deleteWeather_callWeatherDaoDeleteWeather() = runTest {
         // Given
@@ -58,11 +63,13 @@ class WeatherDaoTest {
 
         // When
         weatherDao.deleteWeather(weather)
+        advanceUntilIdle()
 
         // Then
         coVerify { weatherDao.deleteWeather(weather) }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun insertCacheHome_callWeatherDaoInsertCacheHome() = runTest {
         // Given
@@ -72,6 +79,7 @@ class WeatherDaoTest {
 
         // When
         weatherDao.insertCacheHome(homeData)
+        advanceUntilIdle()
 
         // Then
         coVerify { weatherDao.insertCacheHome(homeData) }

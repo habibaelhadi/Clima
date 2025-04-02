@@ -5,6 +5,8 @@ import com.example.clima.model.Alarm
 import com.example.clima.repo.WeatherRepo
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -22,27 +24,31 @@ class AlarmViewModelTest{
         viewModel = AlarmViewModel(repo)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun insertAlarm_callRepoInsertAlarm() = runTest {
 
         // Given
-        val alarm = Alarm(id = 1, startTime = "10:00", endTime = "12:00")
+        val alarm = mockk<Alarm>()
 
         // When
         viewModel.insertAlarm(alarm)
+        advanceUntilIdle()
 
         // Then
         coVerify { repo.insertAlarm(alarm) }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun deleteAlarm_callRepoDeleteAlarm() = runTest {
 
         // Given
-        val alarm = Alarm(id = 1, startTime = "10:00", endTime = "12:00")
+        val alarm = mockk<Alarm>()
 
         // When
         viewModel.deleteAlarm(alarm)
+        advanceUntilIdle()
 
         // Then
         coVerify { repo.deleteAlarm(alarm) }
