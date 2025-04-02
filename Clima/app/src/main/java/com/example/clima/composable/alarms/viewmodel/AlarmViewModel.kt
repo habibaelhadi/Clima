@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AlarmViewModel(val repo : WeatherRepo) : ViewModel()  {
+class AlarmViewModel(val repo: WeatherRepo) : ViewModel() {
 
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms = _alarms.asStateFlow()
 
-    fun getAlarms(){
+    fun getAlarms() {
         viewModelScope.launch {
             repo.getAlarms().collect { alarmList ->
                 val currentTime = System.currentTimeMillis()
@@ -33,13 +33,13 @@ class AlarmViewModel(val repo : WeatherRepo) : ViewModel()  {
         }
     }
 
-   fun insertAlarm(alarm : Alarm){
-        viewModelScope.launch (Dispatchers.IO){
+    fun insertAlarm(alarm: Alarm) {
+        viewModelScope.launch(Dispatchers.IO) {
             repo.insertAlarm(alarm)
         }
     }
 
-    fun deleteAlarm(alarm: Alarm){
+    fun deleteAlarm(alarm: Alarm) {
         viewModelScope.launch {
             repo.deleteAlarm(alarm)
         }
